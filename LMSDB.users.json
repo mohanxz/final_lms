@@ -1,0 +1,143 @@
+[{
+  "_id": {
+    "$oid": "69b2e87ac24b2cf88a8310c3"
+  },
+  "name": "Soundarya",
+  "email": "msoundarya1311@gmail.com",
+  "password": "$2b$10$w1bvevYlbw75KsEAUt/wT.BbhF8a8GMDlJf7LwI1T5s1hOWcryUcq",
+  "role": "admin",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b3ac463c18e8066d01f6f0"
+  },
+  "name": "Mohan Raj S",
+  "email": "rock@gmail.com",
+  "password": "$2b$10$u9E7L8E4k9oF.xVpL62OS.CUx0X.oMMrXwLsQxQ8Wq2YOwEanhT3e",
+  "role": "student",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b3adaebf17e91b91e2c4c3"
+  },
+  "name": "mo",
+  "email": "mo@gmail.com",
+  "password": "$2a$04$VP4mGnh13SkQMA7egKKBiuzM16TOY/t/viGha7GzD2XLkvmMIzv4W",
+  "role": "student",
+  "activeToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjNhZGFlYmYxN2U5MWI5MWUyYzRjMyIsImVtYWlsIjoibW9AZ21haWwuY29tIiwicm9sZSI6InN0dWRlbnQiLCJpYXQiOjE3NzM5ODYyNDksImV4cCI6MTc4MTc2MjI0OX0.3XceD9XCLsmC9pU-KnNn-jbvVhbXFmKHMuqCjvguxTE",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b3bfb16773ffd85fff27db"
+  },
+  "name": "Mo",
+  "email": "rockiemohan12345@gmail.com",
+  "password": "$2a$04$VP4mGnh13SkQMA7egKKBiuzM16TOY/t/viGha7GzD2XLkvmMIzv4W",
+  "role": "student",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b3c5b7141d1874d363055a"
+  },
+  "name": "Super Admin",
+  "email": "mohanrajs2k04@gmail.com",
+  "password": "$2b$10$ajqJs/lgbW9DbjhwzsebAe/URZvL6knq0unoQugRUrTlorQqMTaC.",
+  "role": "superadmin",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b3ebbe95e0b91178e684a4"
+  },
+  "name": "Aditya Jyosyula",
+  "email": "aditya@gmail.com",
+  "password": "$2b$10$BZKpaSgXRZKW5TVgo5DlguIKFvcWLg7U900YGcTk5ZjGPqP/IkAfq",
+  "role": "student",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b3ec0995e0b91178e68553"
+  },
+  "name": "kittu",
+  "email": "lomo@gmail.com",
+  "password": "$2b$10$Wacycv6eGRkxPaOJZDGiLeJdK7WXju.6ZiQ/OOqFoUv5F4tDxBfXu",
+  "role": "student",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b40a2c7438e8c693e78d3e"
+  },
+  "name": "Soundarya2",
+  "email": "soundaryam1311@gmail.com",
+  "password": "$2b$10$YT6chijZuYqWchX0xqIP2.6nMCnVv5S1vRfkx7rLNaB5wqG0cs1v6",
+  "role": "admin",
+  "activeToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjQwYTJjNzQzOGU4YzY5M2U3OGQzZSIsImVtYWlsIjoic291bmRhcnlhbTEzMTFAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzczOTk4NjA4LCJleHAiOjE3ODE3NzQ2MDh9.7L9b254ql59XV1TLcoF0WnSQvMfUs5MrkZoNU2ShVBA",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b414f07438e8c693e79809"
+  },
+  "name": "Mohan Raj S",
+  "email": "raj@gmail.com",
+  "password": "$2b$10$mecV9UAxRiei.ALG7YWAdur.SqpDcymVECKo166NyqGjpQjLlpgJW",
+  "role": "student",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b840647234175a1a78d975"
+  },
+  "name": "Abishek",
+  "email": "Abishek@gmail.com",
+  "password": "$2b$10$jpSpT1RmVL2TfcZVp2ocjO4pG/hoznLmcilzQXjtbMR6U/g/F6QfS",
+  "role": "student",
+  "activeToken": null,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b980d2038c5708a688effd"
+  },
+  "name": "Guru",
+  "email": "2k21aids33@kiot.ac.in",
+  "password": "$2b$10$HfflzYxCuOnqZ2pv5Ro1eu/FFw6j6iOfohQSVf8SC3cVogjO2rBPW",
+  "role": "student",
+  "activeToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Yjk4MGQyMDM4YzU3MDhhNjg4ZWZmZCIsImVtYWlsIjoiMmsyMWFpZHMzM0BraW90LmFjLmluIiwicm9sZSI6InN0dWRlbnQiLCJpYXQiOjE3NzM3NjUxMTAsImV4cCI6MTc4MTU0MTExMH0.BBO33haEfEgqP3ZnLz65sfjJi0aHgU9KW5zNfglqPhI",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b98b3a038c5708a688f135"
+  },
+  "name": "Surya",
+  "email": "certiauto168@gmail.com",
+  "password": "$2b$10$4P4bkrQKpRqgNALGh2WgN.xjqViZk4TdmMlV/voJASbEeFnKR53Vi",
+  "role": "student",
+  "activeToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5Yjk4YjNhMDM4YzU3MDhhNjg4ZjEzNSIsImVtYWlsIjoiY2VydGlhdXRvMTY4QGdtYWlsLmNvbSIsInJvbGUiOiJzdHVkZW50IiwiaWF0IjoxNzczNzY3NTYzLCJleHAiOjE3ODE1NDM1NjN9.ly4q8sa6S_zBjKonsjSOEq4oQyofDEMWQyJvi9yFpTY",
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69bce0c4423b6a4c2a8da8ff"
+  },
+  "name": "John",
+  "email": "mohanrajshankar01@gmail.com",
+  "password": "$2b$10$IEFsqNg3CxomB5RuFWZcUuc9DNMOHsjJ1fkG4thnPkpC8CSoL1kHm",
+  "role": "student",
+  "activeToken": null,
+  "__v": 0
+}]

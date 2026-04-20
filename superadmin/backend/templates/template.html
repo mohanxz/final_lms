@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Completion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: #fff;
+    }
+
+    .certificate-container {
+      width: 1200px;
+      height: 850px;
+      margin: 40px auto;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      position: relative;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .right-section {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 270px;
+      height: 100%;
+      background: linear-gradient(160deg, #009cff 0%, #007acc 100%);
+      z-index: 0;
+      margin-right: 30px;
+    }
+
+    .logo-circle {
+      width: 160px;
+      height: 160px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: 60px;
+      right: 50px;
+      box-shadow: 0px 5px 20px rgba(33, 150, 243, 0.09);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .logo-img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+    }
+
+    .blue-circle {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      z-index: 1;
+    }
+
+    .blue-circle1 {
+      width: 340px;
+      height: 340px;
+      bottom: 250px;
+      right: -170px;
+    }
+
+    .blue-circle2 {
+      width: 340px;
+      height: 340px;
+      bottom: 0px;
+      right: 120px;
+    }
+
+    .left-section {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 930px;
+      padding: 60px 40px 60px 64px;
+      z-index: 2;
+    }
+
+    .top-row {
+      display: block;
+      color: #1e87c6;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 24px;
+    }
+
+    .top-row span:first-child {
+      margin-right: 100px;
+    }
+
+    .certificate-title {
+      font-size: 48px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      line-height: 1.2;
+      color: #222;
+      margin-bottom: 0;
+    }
+
+    .underline {
+      display: block;
+      width: 70px;
+      border-bottom: 4px solid #2096f3;
+      margin-top: 10px;
+      margin-bottom: 32px;
+    }
+
+    .recognition {
+      font-size: 20px;
+      color: #60728a;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    .name-field {
+      font-size: 36px;
+      font-weight: 700;
+      color: #2096f3;
+      margin-bottom: 12px;
+      letter-spacing: 0.3px;
+    }
+
+    .course-desc {
+      font-size: 18px;
+      color: #60728a;
+      margin-bottom: 12px;
+    }
+
+    .course-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2096f3;
+      margin-bottom: 18px;
+      margin-top: 0;
+    }
+
+    .summary {
+      font-size: 16px;
+      color: #3b4151;
+      margin-bottom: 40px;
+      line-height: 1.6;
+      max-width: 780px;
+    }
+
+    .signature-area {
+      margin-top: 30px;
+    }
+
+    .signature-block {
+      display: inline-block;
+      vertical-align: top;
+      margin-right: 80px;
+    }
+
+    .signature-img {
+      width: 120px;
+      height: 48px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    .sig-name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #233a5c;
+      margin-bottom: 0;
+    }
+
+    .sig-title {
+      font-size: 14px;
+      color: #60728a;
+      margin-bottom: 0;
+    }
+
+    .footer-verify {
+      margin-top: 36px;
+      font-size: 13px;
+      color: #60728a;
+    }
+  </style>
+</head>
+<body>
+  <div class="certificate-container">
+    <div class="right-section">
+      <div class="logo-circle">
+        <img src="{{logo}}" alt="Cybernaut Logo" class="logo-img" />
+      </div>
+      <div class="blue-circle blue-circle1"></div>
+      <div class="blue-circle blue-circle2"></div>
+    </div>
+
+    <div class="left-section">
+      <div class="top-row">
+        <span>&lt;&lt;Date&gt;&gt;</span>
+        <span>&lt;&lt;UNIQUE_ID&gt;&gt;</span>
+      </div>
+
+      <div class="certificate-title">
+        CERTIFICATE OF <br>COMPLETION
+      </div>
+      <span class="underline"></span>
+
+      <div class="recognition">
+        With esteemed recognition, this certificate
+      </div>
+
+      <div class="name-field">{{name}}</div>
+
+      <div class="course-desc">
+        Symbolizing the completion of our renowned
+      </div>
+
+      <div class="course-title">
+        "CYBERNAUT’S {{module}} COURSE"
+      </div>
+
+      <div class="summary">
+        Demonstrating a deep understanding of the course material and consistently excelling in all assignments and assessments, {{name}} achieved an impressive score of &lt;&lt;Per&gt;&gt;% on their project assessments. This accomplishment reflects their dedication, hard work, and mastery of Java programming fundamentals.
+      </div>
+
+      <div class="signature-area">
+        <div class="signature-block">
+          <img src="{{sign1}}" alt="Signature JN" class="signature-img" />
+          <div class="sig-name">JAYASURYA GNANAVEL</div>
+          <div class="sig-title">CEO & Founder<br>Cybernaut Edu-Tech LLP</div>
+        </div>
+        <div class="signature-block">
+          <img src="{{sign2}}" alt="Signature MK" class="signature-img" />
+          <div class="sig-name">B. MANISH KUMAR</div>
+          <div class="sig-title">The President & Co-Founder<br>Cybernaut Edu-Tech LLP</div>
+        </div>
+      </div>
+
+      <div class="footer-verify">
+        Cybernaut Edu-Tech LLP confirms the identity of the individual and participation in course<br>
+        Verify at www.cybernaut.co.in | admin@cybernaut.co.in
+      </div>
+    </div>
+  </div>
+</body>
+</html>

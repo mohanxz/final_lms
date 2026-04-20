@@ -1,0 +1,20 @@
+{
+  "name": "cybernaut-lms",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently -n ADMIN,CHAT,LOGIN,STUDENT,SUPERADMIN,CLIENT -c blue,green,yellow,cyan,magenta,white \"npm run admin\" \"npm run chat\" \"npm run login\" \"npm run student\" \"npm run superadmin\" \"npm run client\"",
+    "admin": "cd adminserver/backend && npm run dev",
+    "chat": "cd chatserver && npm run dev",
+    "login": "cd loginserver/backend && npm run dev",
+    "student": "cd studentserver/backend && npm run dev",
+    "superadmin": "cd superadmin/backend && npm run dev",
+    "client": "cd client && npm run dev"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
