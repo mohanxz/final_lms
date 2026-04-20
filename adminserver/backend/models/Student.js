@@ -7,7 +7,8 @@ const studentSchema = new mongoose.Schema({
   address: { type: String, required: true },
   dob: { type: Date, required: true },
   certificate: { type: Boolean, default: false },
-  rollNo: { type: Number, required: true }
+  rollNo: { type: Number, required: true },
+  college: { type: String, default: 'N/A' }
 }, { timestamps: true });
 
 

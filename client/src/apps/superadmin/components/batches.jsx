@@ -115,7 +115,13 @@ const Batches = () => {
     email: "",
     phone: "",
     dob: "",
+    college: "",
   });
+
+  const [universities, setUniversities] = useState([]);
+  const [filteredUnis, setFilteredUnis] = useState([]);
+  const [showUniDropdown, setShowUniDropdown] = useState(false);
+  const [isOtherUni, setIsOtherUni] = useState(false);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -129,7 +135,48 @@ const Batches = () => {
       }
     };
     fetchInitialData();
+    fetchUniversities();
   }, []);
+
+  const fetchUniversities = async () => {
+    try {
+      const response = await fetch("http://universities.hipolabs.com/search?country=India");
+      const data = await response.json();
+      // Remove duplicates and sort
+      const uniqueUnis = [...new Set(data.map(u => u.name))].sort();
+      setUniversities(uniqueUnis);
+    } catch (error) {
+      console.error("Failed to fetch universities:", error);
+    }
+  };
+
+  const handleUniSearch = (query) => {
+    setStudentForm(prev => ({ ...prev, college: query }));
+    if (query.trim() === "") {
+      setFilteredUnis([]);
+      setShowUniDropdown(false);
+      return;
+    }
+
+    const filtered = universities.filter(uni => 
+      uni.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 50); // Limit results for performance
+
+    setFilteredUnis(filtered);
+    setShowUniDropdown(true);
+    setIsOtherUni(false);
+  };
+
+  const selectUniversity = (uni) => {
+    if (uni === "OTHER") {
+      setIsOtherUni(true);
+      setStudentForm(prev => ({ ...prev, college: "" }));
+    } else {
+      setStudentForm(prev => ({ ...prev, college: uni }));
+      setIsOtherUni(false);
+    }
+    setShowUniDropdown(false);
+  };
 
   useEffect(() => {
     const active = batches.filter(b => new Date(b.startDate) <= new Date()).length;
@@ -551,7 +598,8 @@ const Batches = () => {
       !studentForm.name ||
       !studentForm.email ||
       !studentForm.phone ||
-      !studentForm.dob
+      !studentForm.dob ||
+      !studentForm.college
     ) {
       toast.error("Please fill all required fields");
       return;
@@ -579,6 +627,7 @@ const Batches = () => {
           email: studentForm.email,
           phone: studentForm.phone,
           dob: studentForm.dob,
+          college: studentForm.college,
           batch: showAddStudentModal.batchId,
           course: showAddStudentModal.course,
           address: "N/A"
@@ -599,7 +648,8 @@ const Batches = () => {
       
       toast.success(`✅ Student ${studentForm.name} added successfully!`);
 
-      setStudentForm({ name: "", email: "", phone: "", dob: "" });
+      setStudentForm({ name: "", email: "", phone: "", dob: "", college: "" });
+      setIsOtherUni(false);
       setShowAddStudentModal({
         show: false,
         batchId: null,
@@ -1651,39 +1701,39 @@ const Batches = () => {
         </div>
       )}
 
-      {/* Add Single Student Modal - FULL WIDTH */}
+      {/* Add Single Student Modal - Bootstrap Style */}
       {showAddStudentModal.show && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center overflow-y-auto p-4 pt-10">
           <SlideUp>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-[90vw] max-h-[90vh] overflow-y-auto">
-              <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-t-2xl sticky top-0 z-10">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                      <FaUserGraduate /> Add Single Student
-                    </h3>
-                    <p className="text-green-100 text-sm mt-1">
-                      Batch: {showAddStudentModal.batchName}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() =>
-                      setShowAddStudentModal({
-                        show: false,
-                        batchId: null,
-                        batchName: "",
-                        course: null,
-                      })
-                    }
-                    className="text-white/80 hover:text-white text-2xl transition-colors"
-                  >
-                    ×
-                  </button>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg overflow-hidden flex flex-col my-8 border border-gray-200 dark:border-gray-700">
+              {/* Modal Header */}
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <FaUserGraduate className="text-green-600" /> Add Single Student
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs mt-0.5">
+                    Batch: {showAddStudentModal.batchName}
+                  </p>
                 </div>
+                <button
+                  onClick={() =>
+                    setShowAddStudentModal({
+                      show: false,
+                      batchId: null,
+                      batchName: "",
+                      course: null,
+                    })
+                  }
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1"
+                >
+                  <FaTimes className="text-xl" />
+                </button>
               </div>
 
-              <div className="p-8 max-w-2xl mx-auto w-full">
-                <form onSubmit={(e) => { e.preventDefault(); handleAddSingleStudent(); }} className="space-y-4">
+              {/* Modal Body */}
+              <div className="p-6">
+                <form id="add-student-form" onSubmit={(e) => { e.preventDefault(); handleAddSingleStudent(); }} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Full Name <span className="text-red-500">*</span>
@@ -1691,9 +1741,10 @@ const Batches = () => {
                     <input
                       type="text"
                       name="name"
+                      disabled={saving}
                       value={studentForm.name}
                       onChange={handleStudentFormChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+                      className="w-full px-4 py-2.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
                       placeholder="Enter student name"
                       required
                     />
@@ -1706,96 +1757,179 @@ const Batches = () => {
                     <input
                       type="email"
                       name="email"
+                      disabled={saving}
                       value={studentForm.email}
                       onChange={handleStudentFormChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+                      className="w-full px-4 py-2.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
                       placeholder="student@example.com"
                       required
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Phone Number <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={studentForm.phone}
-                      onChange={handleStudentFormChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
-                      placeholder="10-digit mobile number"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Date of Birth <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      name="dob"
-                      value={studentForm.dob}
-                      onChange={handleStudentFormChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
-                      required
-                    />
-                  </div>
-
-                  <div className="flex gap-3 pt-4">
-                    <button
-                      type="submit"
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Phone Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        name="phone"
                       disabled={saving}
-                      className={`flex-1 py-3 px-4 rounded-lg text-white font-medium flex items-center justify-center gap-2 ${
-                        saving
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                      }`}
-                    >
-                      {saving ? (
-                        "Adding..."
-                      ) : (
-                        <>
-                          <FaSave /> Add Student
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowAddStudentModal({
-                          show: false,
-                          batchId: null,
-                          batchName: "",
-                          course: null,
-                        })
-                      }
-                      className="px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
-                    >
-                      Cancel
-                    </button>
+
+                        value={studentForm.phone}
+                        onChange={handleStudentFormChange}
+                        className="w-full px-4 py-2.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
+                        placeholder="10-digit number"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Date of Birth <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        name="dob"
+                      disabled={saving}
+
+                        value={studentForm.dob}
+                        onChange={handleStudentFormChange}
+                        className="w-full px-4 py-2.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      College / University <span className="text-red-500">*</span>
+                    </label>
+                    {isOtherUni ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          name="college"
+                      disabled={saving}
+
+                          value={studentForm.college}
+                          onChange={handleStudentFormChange}
+                          className="w-full px-4 py-2.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                          placeholder="Enter college name manually"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setIsOtherUni(false)}
+                          className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 transition-colors text-xs whitespace-nowrap"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={studentForm.college}
+                            onChange={(e) => handleUniSearch(e.target.value)}
+                            onFocus={() => studentForm.college && setShowUniDropdown(true)}
+                            className="w-full px-4 py-2.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                            placeholder="Search for college..."
+                            required
+                          />
+                          <FaUniversity className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                        </div>
+                        {showUniDropdown && (
+                          <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-xl max-h-48 overflow-y-auto">
+                            {filteredUnis.map((uni, idx) => {
+                              const parts = uni.split(new RegExp(`(${studentForm.college})`, 'gi'));
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => selectUniversity(uni)}
+                                  className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                                >
+                                  {parts.map((part, i) => 
+                                    part.toLowerCase() === (studentForm.college || '').toLowerCase() ? (
+                                      <span key={i} className="font-bold text-green-600 dark:text-green-400">{part}</span>
+                                    ) : (
+                                      <span key={i}>{part}</span>
+                                    )
+                                  )}
+                                </button>
+                              );
+                            })}
+                            <button
+                              type="button"
+                              onClick={() => selectUniversity("OTHER")}
+                              className="w-full text-left px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 text-blue-600 dark:text-blue-400 font-medium flex items-center gap-2"
+                            >
+                              <FaPlus className="text-xs" /> Other (Add Manually)
+                            </button>
+                            {filteredUnis.length === 0 && studentForm.college && (
+                              <div className="px-4 py-2.5 text-gray-500 dark:text-gray-400 text-sm italic">
+                                No matches found.
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 </form>
 
                 {credentials.length > 0 && (
-                  <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                    <p className="text-sm text-green-800 dark:text-green-200 mb-3">
-                      Student added successfully! Download credentials:
+                  <div className="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
+                    <p className="text-sm text-green-800 dark:text-green-200 mb-3 font-medium">
+                      Student added successfully!
                     </p>
                     <button
                       onClick={handleDownloadCSV}
-                      className="w-full py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white rounded-lg flex items-center justify-center gap-2"
+                      className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
                     >
                       <FaDownload /> Download Credentials
                     </button>
                   </div>
                 )}
               </div>
+
+              {/* Modal Footer */}
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2 bg-gray-50 dark:bg-gray-800/50">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowAddStudentModal({
+                      show: false,
+                      batchId: null,
+                      batchName: "",
+                      course: null,
+                    })
+                  }
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  form="add-student-form"
+                  type="submit"
+                  disabled={saving}
+                  className={`px-4 py-2 rounded text-white font-medium shadow-sm transition-all active:scale-95 ${
+                    saving
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {saving ? "Processing..." : "Add Student"}
+                </button>
+              </div>
             </div>
           </SlideUp>
         </div>
       )}
+
     </div>
   );
 };

@@ -21,6 +21,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Settings from "./components/settings";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AnalystDashboard from "./components/analytics";
 
 const routeTitles = {
   "/superadmin": "Dashboard",
@@ -125,7 +126,8 @@ const AppContent = () => {
               path="/analytics"
               element={
                 <PrivateRoute>
-                  <AnalyticsPage />
+                  {/* <AnalyticsPage /> */}
+                  <AnalystDashboard/>
                 </PrivateRoute>
               }
             />

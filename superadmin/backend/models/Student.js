@@ -37,6 +37,11 @@ const studentSchema = new mongoose.Schema({
     type: Number, 
     required: true,
     unique: true   // ⭐ prevents duplicate roll numbers
+  },
+
+  college: {
+    type: String,
+    default: "N/A"
   }
 
 }, { timestamps: true });

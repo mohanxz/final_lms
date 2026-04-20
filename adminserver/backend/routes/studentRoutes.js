@@ -77,6 +77,7 @@ router.get("/my-students", verifyAccessToken, async (req, res) => {
         phone: s.phone,
         dob: s.dob,
         rollNo: s.rollNo,
+        college: s.college || "N/A",
         address: s.address,
       })),
       batchOptions,

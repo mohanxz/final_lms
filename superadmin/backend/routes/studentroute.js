@@ -93,6 +93,7 @@ router.post("/save-selected", verifyAccessToken, async (req, res) => {
         const email = sanitizeCell(stu.email);
         const name = sanitizeCell(stu.name);
         const phone = sanitizeCell(stu.phone);
+        const college = sanitizeCell(stu.college) || "N/A";
         const address = sanitizeCell(stu.address) || "N/A";
         const batchId = stu.batch;
         
@@ -166,6 +167,7 @@ router.post("/save-selected", verifyAccessToken, async (req, res) => {
           phone,
           address,
           dob,
+          college,
           rollNo: finalRollNo
         });
 
@@ -183,6 +185,7 @@ router.post("/save-selected", verifyAccessToken, async (req, res) => {
             email,
             password: plainPassword,
             rollNo: finalRollNo,
+            college,
             batch: batchName,
             course: courseName
           });
@@ -428,6 +431,10 @@ router.post("/save-selected", verifyAccessToken, async (req, res) => {
                           <div class="info-label">Phone</div>
                           <div class="info-value">${phone}</div>
                         </div>
+                        <div class="info-item">
+                          <div class="info-label">College</div>
+                          <div class="info-value">${college}</div>
+                        </div>
                       </div>
                     </div>
                     
@@ -510,7 +517,7 @@ router.post("/save-selected", verifyAccessToken, async (req, res) => {
 /* ================= UPDATE STUDENT ================= */
 router.put('/:id', verifyAccessToken, async (req, res) => {
   try {
-    const { name, email, phone, dob, batch, address, rollNo } = req.body;
+    const { name, email, phone, dob, batch, address, rollNo, college } = req.body;
     const studentId = req.params.id;
 
     // Find the student
@@ -549,6 +556,7 @@ router.put('/:id', verifyAccessToken, async (req, res) => {
     if (address) updateData.address = address;
     if (batch) updateData.batch = batch;
     if (rollNo) updateData.rollNo = rollNo;
+    if (college) updateData.college = college;
 
     const updatedStudent = await Student.findByIdAndUpdate(
       studentId,
@@ -575,6 +583,7 @@ router.put('/:id', verifyAccessToken, async (req, res) => {
         batch: batchInfo.batchName || '',
         course: courseInfo.courseName || '',
         rollNo: updatedStudent.rollNo,
+        college: updatedStudent.college,
         address: updatedStudent.address
       }
     });
@@ -658,7 +667,7 @@ router.delete('/delete-by-batch/:batchId', verifyAccessToken, async (req, res) =
 router.post('/download-credentials', verifyAccessToken, (req, res) => {
   try {
     const parser = new Parser({
-      fields: ['name', 'email', 'password', 'rollNo', 'course', 'batch']
+      fields: ['name', 'email', 'password', 'rollNo', 'college', 'course', 'batch']
     });
     const csv = parser.parse(req.body);
     res.header('Content-Type', 'text/csv');
@@ -695,6 +704,7 @@ router.get('/', verifyAccessToken, async (req, res) => {
       batch: student.batch?.batchName || '',
       course: student.batch?.course?.courseName || '',
       rollNo: student.rollNo,
+      college: student.college || 'N/A',
       address: student.address
     }));
 
