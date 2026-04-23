@@ -17,6 +17,8 @@ const codingRoutes = require('./routes/codingRoutes');
 const courseRoutes = require('./routes/course');
 const projectRoutes = require("./routes/project");
 const finalQuizRoute = require('./routes/finalQuiz');
+const practicalRoutes = require('./routes/practical');
+ 
 
 const app = express();
 
@@ -60,5 +62,6 @@ app.use("/api/coding", codingRoutes);
 app.use('/api/courses', courseRoutes);
 app.use("/api/project", projectRoutes);
 app.use('/api/final-quiz', finalQuizRoute);
+app.use('/api/practical', practicalRoutes);
 
 app.listen(5003, () => console.log('Student server on 5003'));

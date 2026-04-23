@@ -18,7 +18,7 @@ const noteSchema = new mongoose.Schema(
       required: true,
     },
     day: { type: Number, required: true },
-    type: { type: String, enum: ["seminar", "practical", "theory", "regular"], default: "regular" },
+    type: { type: String, enum: ["seminar", "practical", "theory", "regular", "hackerrank"], default: "regular" },
   },
   { timestamps: true },
 );

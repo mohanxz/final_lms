@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import Quiz from './pages/Quiz';
 import AdminCoding from './pages/AdminCoding';
 import BatchEvaluation from './pages/BatchEvaluation';
+import AdminPractical from './pages/AdminPractical';
 
 function AppRoutes() {
   return (
@@ -107,7 +108,16 @@ function AppRoutes() {
             </PrivateRoute>
           }
         />
-
+   <Route
+          path="/batch/:batchId/practical"
+          element={
+            <PrivateRoute>
+              <Sidebar>
+                <AdminPractical />
+              </Sidebar>
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/batch/:batchId/report"
           element={

@@ -248,11 +248,11 @@ function StudentHome() {
                   
                   {/* Stats Badge */}
                   <div className="bg-white/15 backdrop-blur-md rounded-2xl p-5 text-center min-w-[160px] border border-white/20">
-                    <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                    {/* <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                       <FaTrophy className="text-2xl text-white" />
-                    </div>
-                    <p className="text-2xl font-bold text-white">{overallProgress}%</p>
-                    <p className="text-blue-100 text-sm">Overall Progress</p>
+                    </div> */}
+                    <p className="text-2xl font-bold text-white">{latestNote ? latestNote.day : 'N/A'}</p>
+                    <p className="text-blue-100 text-sm">Current Day</p>
                   </div>
                 </div>
               </div>
@@ -261,7 +261,7 @@ function StudentHome() {
 
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <SlideUp delay={150}>
+            {/* <SlideUp delay={150}>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-blue-300 dark:hover:border-cyan-700 group">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:scale-110">
@@ -273,8 +273,8 @@ function StudentHome() {
                   </div>
                 </div>
               </div>
-            </SlideUp>
-
+            </SlideUp> */}
+{/* 
             <SlideUp delay={200}>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-cyan-300 dark:hover:border-cyan-700 group">
                 <div className="flex items-center gap-3">
@@ -287,8 +287,8 @@ function StudentHome() {
                   </div>
                 </div>
               </div>
-            </SlideUp>
-
+            </SlideUp> */}
+{/* 
             <SlideUp delay={250}>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 group">
                 <div className="flex items-center gap-3">
@@ -301,9 +301,9 @@ function StudentHome() {
                   </div>
                 </div>
               </div>
-            </SlideUp>
+            </SlideUp> */}
 
-            <SlideUp delay={300}>
+            {/* <SlideUp delay={300}>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-cyan-300 dark:hover:border-cyan-700 group">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:scale-110">
@@ -317,11 +317,11 @@ function StudentHome() {
                   </div>
                 </div>
               </div>
-            </SlideUp>
+            </SlideUp> */}
           </div>
 
           {/* Main Dashboard Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols gap-8">
             {/* Left Column - Progress & Activities */}
             <div className="lg:col-span-2 space-y-8">
               {/* Course Progress Section */}
@@ -501,16 +501,16 @@ function StudentHome() {
                                     {report.day}
                                   </span>
                                 </td>
-                                {report.marksObtained.map((mark, i) => (
+                                {report.marksObtained.slice(0,3).map((mark, i) => (
                                   <td className="px-4 py-4 text-center" key={i}>
                                     <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium min-w-[90px] ${
-                                      mark === -2
-                                        ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
-                                        : mark === -1
-                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
+                                      mark === -3 || mark === -2
+                                        ?"bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
+                                        : mark === -1 || mark === -4
+                                        ?  "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
                                         : "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
                                     }`}>
-                                      {mark === -2 ? "Not Submitted" : mark === -1 ? "Pending" : `${mark}%`}
+                                      {mark === -2 ? "Not Submitted" : mark === -1 ? "Pending" : mark === -4 ? "Yet to Attend" : mark === -3 ? "Yet to Assign" : `${mark}%`}
                                     </span>
                                   </td>
                                 ))}
@@ -527,7 +527,7 @@ function StudentHome() {
             {/* Right Sidebar */}
             <div className="lg:col-span-1 space-y-8">
               {/* Calendar Section */}
-              <SlideUp delay={150}>
+              {/* <SlideUp delay={150}>
                 <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                   <div className="relative px-6 pt-6 pb-3">
                     <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 rounded-l-2xl"></div>
@@ -543,10 +543,10 @@ function StudentHome() {
                     <CalendarWidget date={date} setDate={setDate} />
                   </div>
                 </div>
-              </SlideUp>
+              </SlideUp> */}
 
               {/* Reminders Section */}
-              <SlideUp delay={200}>
+              {/* <SlideUp delay={200}>
                 <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                   <div className="relative px-6 pt-6 pb-3">
                     <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 rounded-l-2xl"></div>
@@ -562,10 +562,10 @@ function StudentHome() {
                     <NotesWidget studentId={student._id} />
                   </div>
                 </div>
-              </SlideUp>
+              </SlideUp> */}
 
               {/* Quick Stats */}
-              <SlideUp delay={250}>
+            {/* <SlideUp delay={250}>
                 <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                   <div className="relative px-6 pt-6 pb-3">
                     <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 rounded-l-2xl"></div>
@@ -578,7 +578,6 @@ function StudentHome() {
                     <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Your learning snapshot</p>
                   </div>
                   <div className="p-5 pt-2 space-y-4">
-                    {/* Progress Ring */}
                     <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-br from-blue-50/50 to-cyan-50/50 dark:from-blue-900/20 dark:to-cyan-900/20 border border-blue-200/50 dark:border-cyan-800/50">
                       <div className="flex items-center gap-3">
                         <div className="relative w-16 h-16">
@@ -626,7 +625,7 @@ function StudentHome() {
                     </div>
                   </div>
                 </div>
-              </SlideUp>
+              </SlideUp> */}
             </div>
           </div>
         </div>

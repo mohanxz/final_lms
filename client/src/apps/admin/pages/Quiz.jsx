@@ -445,7 +445,7 @@ export default function AdminQuizzes() {
       <div className="relative z-10 max-w-7xl mx-auto p-6 lg:p-8">
         {/* Back Button */}
         <button
-          onClick={() => navigate(`/admin/lesson-plan/${batchId}`)}
+          onClick={() => navigate(`/admin/batch/${batchId}/lesson-plan/`)}
           className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-white dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md"
         >
           <FaArrowLeft className="text-sm" />
@@ -488,7 +488,7 @@ export default function AdminQuizzes() {
                 </div>
 
                 {/* Stats Badge */}
-                <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 text-center min-w-[160px] border border-white/20">
+                {/* <div className="bg-white/15 backdrop-blur-md rounded-2xl p-4 text-center min-w-[160px] border border-white/20">
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <FaTrophy className="text-yellow-300 text-xl" />
                     <span className="text-white text-sm font-medium">
@@ -501,7 +501,7 @@ export default function AdminQuizzes() {
                   <p className="text-blue-100 text-xs">
                     {quizzesWithQuestions} Active Quizzes
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -539,7 +539,7 @@ export default function AdminQuizzes() {
               </div>
             </div>
           </div>
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-md">
+          {/* <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-md">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
                 <FaQuestionCircle className="text-indigo-600 dark:text-indigo-400 text-lg" />
@@ -553,7 +553,7 @@ export default function AdminQuizzes() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-md">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center">

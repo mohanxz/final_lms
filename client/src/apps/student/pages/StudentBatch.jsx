@@ -363,7 +363,7 @@ const NoteCard = ({
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-blue-600 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                 >
                   <FaExternalLinkAlt className="text-[10px]" />
-                  Reference Link
+                  Assignment Link
                 </button>
               )}
               {hasAssignmentFile && (
@@ -462,7 +462,7 @@ const NoteCard = ({
           )}
 
           {/* PDF Upload Section */}
-          {hasAssignmentFile && (
+          {/* {hasAssignmentFile && (
             <div
               className={
                 hasAssignmentLink
@@ -537,7 +537,7 @@ const NoteCard = ({
                 </div>
               )}
             </div>
-          )}
+          )} */}
 
           {/* No submission options available */}
           {!hasAssignmentLink && !hasAssignmentFile && (
@@ -863,7 +863,7 @@ export default function StudentBatch() {
               </div>
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Total Notes
+                  Total Days
                 </p>
                 <p className="text-xl font-bold text-gray-800 dark:text-white">
                   {totalNotes}
@@ -871,7 +871,7 @@ export default function StudentBatch() {
               </div>
             </div>
           </div>
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-green-300 dark:hover:border-green-700 group">
+          {/* <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-green-300 dark:hover:border-green-700 group">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:scale-110">
                 <FaCheckCircle className="text-white text-lg" />
@@ -885,7 +885,7 @@ export default function StudentBatch() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-700 group">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:scale-110">
@@ -908,7 +908,7 @@ export default function StudentBatch() {
               </div>
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Total Activities
+                  Total Coding
                 </p>
                 <p className="text-xl font-bold text-gray-800 dark:text-white">
                   {completedPdfAssignments + completedQuizzes}

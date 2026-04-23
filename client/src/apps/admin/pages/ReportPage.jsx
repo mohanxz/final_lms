@@ -278,7 +278,7 @@ const ReportPage = () => {
                 <p className="text-2xl font-bold mt-1">{currentActivityStats.totalStudents}</p>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-4 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
+              {/* <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-4 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <FaCode size={20} className="opacity-90" />
                   <span className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">
@@ -287,8 +287,8 @@ const ReportPage = () => {
                 </div>
                 <p className="text-sm font-semibold mt-2">Coding</p>
                 <p className="text-xs opacity-75 mt-1">Submissions</p>
-              </div>
-
+              </div> */}
+{/* 
               <div className="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl p-4 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
                 <div className="flex items-center justify-between">
                   <MdQuiz size={20} className="opacity-90" />
@@ -298,9 +298,9 @@ const ReportPage = () => {
                 </div>
                 <p className="text-sm font-semibold mt-2">Quiz</p>
                 <p className="text-xs opacity-75 mt-1">Submissions</p>
-              </div>
+              </div> */}
             </div>
-
+{/* 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl p-4 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
                 <div className="flex items-center justify-between">
@@ -345,7 +345,7 @@ const ReportPage = () => {
                 <p className="text-sm font-semibold mt-2">Practical</p>
                 <p className="text-xs opacity-75 mt-1">Submissions</p>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 

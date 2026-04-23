@@ -12,6 +12,9 @@ import ReportList from './pages/ReportList';
 import StudentProject from './pages/StudentProject';
 import FinalAssignment from './pages/FinalAssignment';
 import FinalQuizAttempt from './pages/FinalQuiz';
+import FinalPractical from './pages/FinalPractical';
+import AttemptPractical from './pages/AttemptPractical';
+
 
 
 function AppRoutes() {
@@ -133,7 +136,27 @@ function AppRoutes() {
             </PrivateRoute>
           }
         />
-      </Routes>
+
+           <Route
+          path="/practical"
+          element={
+            <PrivateRoute>
+              <Sidebar pageTitle="Practical">
+                <FinalPractical />
+              </Sidebar>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/practical/attempt/:noteId"
+          element={
+            <PrivateRoute>
+              <AttemptPractical/>
+            </PrivateRoute>
+          }
+        />
+        </Routes>
     </>
   );
 }

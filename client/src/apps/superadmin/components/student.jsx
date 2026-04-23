@@ -19,12 +19,12 @@ import {
   FaChalkboardTeacher,
   FaUserCircle,
   FaIdCard,
-  FaMapMarkerAlt,
   FaBirthdayCake,
   FaCheckCircle,
   FaSpinner,
   FaDownload,
-  FaChartLine
+  FaChartLine,
+  FaUniversity
 } from "react-icons/fa";
 import { FadeIn, SlideUp } from "../../../shared/LoadingComponents";
 
@@ -114,8 +114,12 @@ const Student = () => {
     dob: "",
     batch: "",
     course: "",
-    address: "",
+    college: "",
   });
+  const [universities, setUniversities] = useState([]);
+  const [filteredUnis, setFilteredUnis] = useState([]);
+  const [showUniDropdown, setShowUniDropdown] = useState(false);
+  const [isOtherUni, setIsOtherUni] = useState(false);
   const [batches, setBatches] = useState([]);
   const [courses, setCourses] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -132,7 +136,47 @@ const Student = () => {
 
   useEffect(() => {
     fetchInitialData();
+    fetchUniversities();
   }, []);
+
+  const fetchUniversities = async () => {
+    try {
+      const response = await fetch("http://universities.hipolabs.com/search?country=India");
+      const data = await response.json();
+      const uniqueUnis = [...new Set(data.map(u => u.name))].sort();
+      setUniversities(uniqueUnis);
+    } catch (error) {
+      console.error("Failed to fetch universities:", error);
+    }
+  };
+
+  const handleUniSearch = (query) => {
+    setFormData(prev => ({ ...prev, college: query }));
+    if (query.trim() === "") {
+      setFilteredUnis([]);
+      setShowUniDropdown(false);
+      return;
+    }
+
+    const filtered = universities.filter(uni => 
+      uni.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 50);
+
+    setFilteredUnis(filtered);
+    setShowUniDropdown(true);
+    setIsOtherUni(false);
+  };
+
+  const selectUniversity = (uni) => {
+    if (uni === "OTHER") {
+      setIsOtherUni(true);
+      setFormData(prev => ({ ...prev, college: "" }));
+    } else {
+      setFormData(prev => ({ ...prev, college: uni }));
+      setIsOtherUni(false);
+    }
+    setShowUniDropdown(false);
+  };
 
   useEffect(() => {
     updateFilteredBatches();
@@ -281,8 +325,9 @@ const Student = () => {
       dob: "",
       batch: "",
       course: "",
-      address: "",
+      college: "",
     });
+    setIsOtherUni(false);
     setIsAddEditModalOpen(true);
   };
 
@@ -294,10 +339,11 @@ const Student = () => {
       email: student.user?.email || "",
       phone: student.phone || "",
       dob: student.dob ? new Date(student.dob).toISOString().split("T")[0] : "",
-      batch: student.batch || "",
+      batch: student.batchId || "",
       course: student.course || "",
-      address: student.address || "",
+      college: student.college || "",
     });
+    setIsOtherUni(false);
     setIsAddEditModalOpen(true);
   };
 
@@ -324,7 +370,8 @@ const Student = () => {
       !formData.email ||
       !formData.phone ||
       !formData.dob ||
-      !formData.batch
+      !formData.batch ||
+      !formData.college
     ) {
       toast.error("Please fill all required fields");
       return;
@@ -353,7 +400,7 @@ const Student = () => {
             email: formData.email,
             phone: formData.phone,
             dob: formData.dob,
-            address: formData.address || "Not provided",
+            college: formData.college,
             batch: formData.batch,
             course: formData.course || "",
           },
@@ -383,7 +430,7 @@ const Student = () => {
           email: formData.email,
           phone: formData.phone,
           dob: formData.dob,
-          address: formData.address || "Not provided",
+          college: formData.college,
           batch: formData.batch,
           course: formData.course || "",
           rollNo: selectedStudent.rollNo,
@@ -686,7 +733,7 @@ const Student = () => {
                 <Info label="Batch" value={selectedStudent.batch} icon={FaBook} />
                 <Info label="Phone" value={selectedStudent.phone || "-"} icon={FaPhone} />
                 <Info label="Date of Birth" value={selectedStudent.dob ? new Date(selectedStudent.dob).toLocaleDateString() : "-"} icon={FaBirthdayCake} />
-                <Info label="Address" value={selectedStudent.address || "-"} icon={FaMapMarkerAlt} />
+                <Info label="College" value={selectedStudent.college || "-"} icon={FaUniversity} />
               </div>
             </div>
             <div className="px-6 py-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
@@ -779,22 +826,84 @@ const Student = () => {
                   >
                     <option value="">Select Batch</option>
                     {getBatchOptions().map((batch) => (
-                      <option key={batch._id} value={batch.batchName}>{batch.batchName}</option>
+                      <option key={batch._id} value={batch._id}>{batch.batchName}</option>
                     ))}
                   </select>
                 </div>
-                <div>
+                <div className="relative">
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Address
+                    College / University <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleFormChange}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Student address"
-                  />
+                  {isOtherUni ? (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        name="college"
+                        value={formData.college}
+                        onChange={handleFormChange}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                        placeholder="Enter college name manually"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setIsOtherUni(false)}
+                        className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 transition-colors text-xs whitespace-nowrap"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.college}
+                          onChange={(e) => handleUniSearch(e.target.value)}
+                          onFocus={() => formData.college && setShowUniDropdown(true)}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                          placeholder="Search for college..."
+                          required
+                        />
+                        <FaUniversity className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      </div>
+                      {showUniDropdown && (
+                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-xl max-h-48 overflow-y-auto">
+                          {filteredUnis.map((uni, idx) => {
+                            const parts = uni.split(new RegExp(`(${formData.college})`, 'gi'));
+                            return (
+                              <button
+                                key={idx}
+                                type="button"
+                                onClick={() => selectUniversity(uni)}
+                                className="w-full text-left px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
+                              >
+                                {parts.map((part, i) => 
+                                  part.toLowerCase() === (formData.college || '').toLowerCase() ? (
+                                    <span key={i} className="font-bold text-blue-600 dark:text-blue-400">{part}</span>
+                                  ) : (
+                                    <span key={i}>{part}</span>
+                                  )
+                                )}
+                              </button>
+                            );
+                          })}
+                          <button
+                            type="button"
+                            onClick={() => selectUniversity("OTHER")}
+                            className="w-full text-left px-4 py-2.5 bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 text-blue-600 dark:text-blue-400 font-medium flex items-center gap-2"
+                          >
+                            <FaPlus className="text-xs" /> Other (Add Manually)
+                          </button>
+                          {filteredUnis.length === 0 && formData.college && (
+                            <div className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm italic">
+                              No matches found.
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex gap-3 pt-6 mt-4 border-t dark:border-gray-700">

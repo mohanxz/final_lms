@@ -256,7 +256,7 @@ export default function AdminCoding() {
   };
 
   return (
-    <div className="p-4 sm:p-6 mx-auto text-gray-900 dark:bg-black dark:text-white min-h-screen max-w-5xl">
+    <div className="p-4 sm:p-6 mx-auto text-gray-900 dark:bg-black dark:text-white min-h-screen max-w-7xl">
       <Toaster position="top-right" />
       <h2 className="text-2xl font-bold mb-6">
         Coding Manager – <span className="text-indigo-600">{selectedModule}</span>
@@ -281,23 +281,28 @@ export default function AdminCoding() {
         </div>
       )}
 
-      {/* Notes list */}
-      <div className="space-y-6">
-        {notes.filter(note => note.type !== 'theory' && note.type !== 'seminar').map((note) => (
+      {/* Notes list - Updated to Grid with 3 columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {notes.filter(note => note.type !== 'theory' && note.type !== 'seminar' && note.type !== 'practical').map((note) => (
           <div
             key={note._id}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 dark:border-gray-700 p-6 flex flex-col justify-between transition-all duration-300 group"
           >
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold">
-                Day {note.day}: <span className="break-words">{note.title}</span>
+            <div>
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                  Day {note.day}
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                {note.title}
               </h3>
               {codingMap[note._id] && codingMap[note._id].length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-6">
                   {codingMap[note._id].map((q, qidx) => (
                     <span 
                       key={q._id || qidx} 
-                      className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs rounded border border-indigo-100 dark:border-indigo-800"
+                      className="px-2 py-1 bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 text-[10px] font-bold rounded-md border border-gray-100 dark:border-gray-600"
                     >
                       {q.title || `Q${qidx + 1}`}
                     </span>
@@ -307,9 +312,9 @@ export default function AdminCoding() {
             </div>
             <button
               onClick={() => openModal(note._id)}
-              className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-md hover:shadow-indigo-500/20 whitespace-nowrap w-full sm:w-auto justify-center font-semibold"
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-indigo-500/20 active:scale-95 mt-auto"
             >
-              <FaEdit />
+              <FaEdit className="text-xs" />
               {(codingMap[note._id] && codingMap[note._id].length > 0) ? "Manage Coding" : "Add Coding"}
             </button>
           </div>

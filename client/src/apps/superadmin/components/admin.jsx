@@ -120,6 +120,11 @@ export default function Admins() {
       return;
     }
 
+    if (formData.phone.length !== 10) {
+      toast.error("Phone number must be exactly 10 digits");
+      return;
+    }
+
     const payload = {
       name: formData.name,
       email: formData.email,
@@ -777,9 +782,13 @@ export default function Admins() {
                       </label>
                       <input
                         type="text"
+                        maxLength={10}
                         className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-cyan-500 transition-all"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setFormData({ ...formData, phone: val });
+                        }}
                         required
                         placeholder="10-digit mobile number"
                       />

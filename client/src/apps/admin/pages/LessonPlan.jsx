@@ -145,6 +145,9 @@ const AdminNoteCard = ({
                 <FaCalendarAlt className="text-[10px]" />
                 Day {note.day}
               </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-full border border-gray-200 dark:border-gray-600">
+                {note.type ? note.type.charAt(0).toUpperCase() + note.type.slice(1) : "Regular"}
+              </span>
               {isLatest && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold rounded-full shadow-md">
                   <FaFire className="text-[10px]" />
@@ -170,15 +173,18 @@ const AdminNoteCard = ({
         <div className="px-5 pb-3">
           <div className="flex flex-wrap gap-2">
             {note.assignmentlink && (
-              <a
-                href={note.assignmentlink}
+             <div>
+              { note.assignmentlink.split(",").map((l,i)=>(
+             <a key={i}
+                href={l}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 text-blue-600 dark:text-cyan-400 rounded-lg text-xs hover:from-blue-100 hover:to-cyan-100 transition-all"
               >
                 <FaLink size={12} />
-                Assignment Link
+                Assignment Link { i+1}
               </a>
+             ))}</div>
             )}
             {note.assignmentS3Url && (
               <a
@@ -213,7 +219,7 @@ const AdminNoteCard = ({
       {/* Action Buttons - REMOVED Evaluate button */}
       <div className="px-5 pb-5">
         <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-          <div className="grid grid-cols-2 gap-2">
+          <div className={`${["seminar", "theory", "hackerrank"].includes(note.type) ? "grid-cols-1" : "grid-cols-2"} grid gap-2`}>
             <button
               onClick={() => onEdit(note)}
               className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg group/btn"
@@ -222,18 +228,20 @@ const AdminNoteCard = ({
               <span className="hidden sm:inline">Edit</span>
             </button>
 
-            <button
-              onClick={() => onCodeEval(note._id)}
-              className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg group/btn"
-            >
-              <FaCode className="text-sm group-hover/btn:scale-110 transition-transform" />
-              <span className="hidden sm:inline">Code</span>
-              {submissionCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded-full text-xs">
-                  {submissionCount}
-                </span>
-              )}
-            </button>
+            {!["seminar", "theory", "hackerrank"].includes(note.type) ? (
+              <button
+                onClick={() => onCodeEval(note._id)}
+                className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg group/btn"
+              >
+                <FaCode className="text-sm group-hover/btn:scale-110 transition-transform" />
+                <span className="hidden sm:inline">Code</span>
+                {submissionCount > 0 && (
+                  <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded-full text-xs">
+                    {submissionCount}
+                  </span>
+                )}
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
@@ -249,6 +257,7 @@ export default function LessonPlan() {
     meetlink: "",
     assignmentlink: "",
     day: "",
+    type: "regular",
   });
   const [assignmentFile, setAssignmentFile] = useState(null);
   const [adminId, setAdminId] = useState(null);
@@ -343,6 +352,7 @@ export default function LessonPlan() {
       meetlink: "",
       assignmentlink: "",
       day: "",
+      type: "regular",
     });
     setAssignmentFile(null);
     setShowModal(true);
@@ -354,6 +364,7 @@ export default function LessonPlan() {
       meetlink: note.meetlink || "",
       assignmentlink: note.assignmentlink || "",
       day: note.day,
+      type: note.type || "regular",
     });
     setEditingNoteId(note._id);
     setAssignmentFile(null);
@@ -433,7 +444,7 @@ export default function LessonPlan() {
         admin: adminId,
         day: dayNumber,
         weekNumber: weekNumber,
-        type: "regular",
+        type: form.type || "regular",
       };
 
       console.log("Submitting payload:", payload);
@@ -536,22 +547,20 @@ export default function LessonPlan() {
                   <div className="flex items-center justify-center gap-2 mb-2">
                     <FaFire className="text-orange-300 text-xl" />
                     <span className="text-white text-sm font-medium">
-                      Total Lessons
+                      Total Day
                     </span>
                   </div>
                   <p className="text-2xl font-bold text-white">
                     {totalLessons}
                   </p>
-                  <p className="text-blue-100 text-xs">
-                    {totalSubmissions} Code Submissions
-                  </p>
+               
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-blue-300 dark:hover:border-cyan-700 group">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
@@ -567,21 +576,7 @@ export default function LessonPlan() {
               </div>
             </div>
           </div>
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-700 group">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                <FaCode className="text-white text-lg" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Code Submissions
-                </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-white">
-                  {totalSubmissions}
-                </p>
-              </div>
-            </div>
-          </div>
+      
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-blue-300 dark:hover:border-cyan-700 group">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
@@ -612,7 +607,7 @@ export default function LessonPlan() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="mb-8">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50 overflow-x-auto">
@@ -636,7 +631,7 @@ export default function LessonPlan() {
                 className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg group/btn ml-auto"
               >
                 <FaPlus className="text-xs group-hover/btn:rotate-90 transition-transform" />
-                New Lesson
+                New Days
               </button>
             </div>
           </div>
@@ -651,7 +646,7 @@ export default function LessonPlan() {
                     <div className="w-1 h-7 bg-gradient-to-b from-orange-500 to-red-500 rounded-full"></div>
                     <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                       <FaFire className="text-orange-500" />
-                      Latest Lesson
+                      Current Day
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 gap-6">
@@ -673,10 +668,10 @@ export default function LessonPlan() {
                     <div className="w-1 h-7 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></div>
                     <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
                       <FaClock className="text-blue-500" />
-                      Previous Lessons
+                      Previous Days
                     </h2>
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                      ({notes.length - 1} lessons)
+                      ({notes.length - 1} Days)
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -744,7 +739,7 @@ export default function LessonPlan() {
               </div>
 
               <div className="p-6 space-y-5 overflow-y-auto flex-1">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className={`grid grid-cols-1 ${["seminar", "theory", "practical"].includes(form.type) ? "" : "md:grid-cols-2"} gap-5`}>
                   {/* Left Column */}
                   <div className="space-y-5">
                     <div>
@@ -777,111 +772,132 @@ export default function LessonPlan() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Meet Link
+                        Lesson Type *
                       </label>
-                      <div className="relative">
-                        <FaVideo className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-sm" />
-                        <input
-                          className="w-full border border-gray-300 dark:border-gray-600 rounded-xl py-3 pl-10 pr-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="https://meet.google.com/xyz-abc"
-                          value={form.meetlink}
-                          onChange={(e) => setForm({ ...form, meetlink: e.target.value })}
-                        />
-                      </div>
+                      <select
+                        className="w-full border border-gray-300 dark:border-gray-600 rounded-xl p-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        value={form.type}
+                        onChange={(e) => setForm({ ...form, type: e.target.value })}
+                      >
+                        <option value="regular">Regular Lesson</option>
+                        <option value="seminar">Seminar</option>
+                        <option value="practical">Practical</option>
+                        <option value="theory">Theory</option>
+                        <option value="hackerrank">HackerRank</option>
+                      </select>
                     </div>
+
+                    
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Meet Link
+                        </label>
+                        <div className="relative">
+                          <FaVideo className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-sm" />
+                          <input
+                            className="w-full border border-gray-300 dark:border-gray-600 rounded-xl py-3 pl-10 pr-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder="https://meet.google.com/xyz-abc"
+                            value={form.meetlink}
+                            onChange={(e) => setForm({ ...form, meetlink: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                   
                   </div>
 
                   {/* Right Column */}
-                  <div className="space-y-5">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Assignment Link
-                      </label>
-                      <div className="relative">
-                        <FaLink className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 text-sm" />
-                        <input
-                          className="w-full border border-gray-300 dark:border-gray-600 rounded-xl py-3 pl-10 pr-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                          placeholder="https://forms.gle/..."
-                          value={form.assignmentlink}
-                          onChange={(e) => setForm({ ...form, assignmentlink: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Notes File
-                      </label>
-                      <div className="space-y-3">
-                        <div
-                          onClick={() => document.getElementById("file-upload").click()}
-                          className={`border-2 border-dashed rounded-xl p-4 cursor-pointer transition-all duration-200 ${
-                            assignmentFile
-                              ? "border-green-400 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
-                              : "border-gray-300 dark:border-gray-600 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-100 hover:to-cyan-100 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/30"
-                          }`}
-                        >
-                          {assignmentFile ? (
-                            <div className="flex items-center gap-3">
-                              <div className="flex-shrink-0">
-                                {getFileIcon(assignmentFile.name)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                  {assignmentFile.name}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {getFileTypeDisplay(assignmentFile.name)} • {(assignmentFile.size / 1024).toFixed(1)} KB
-                                </p>
-                              </div>
-                              <FaCheckCircle className="text-green-500 text-lg flex-shrink-0" />
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
-                              <FaCloudUploadAlt className="text-3xl text-blue-400 dark:text-cyan-400 flex-shrink-0" />
-                              <div className="flex flex-col">
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                  Click to upload notes file
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  PDF, DOC, Images, Archives supported
-                                </p>
-                              </div>
-                            </div>
-                          )}
+                  {!["seminar", "theory", "practical"].includes(form.type) && (
+                    <div className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Assignment Link
+                        </label>
+                        <div className="relative">
+                          <FaLink className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400 text-sm" />
+                          <input
+                            className="w-full border border-gray-300 dark:border-gray-600 rounded-xl py-3 pl-10 pr-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            placeholder="https://forms.gle/..."
+                            value={form.assignmentlink}
+                            onChange={(e) => setForm({ ...form, assignmentlink: e.target.value })}
+                          />
                         </div>
+                      </div>
 
-                        <input
-                          type="file"
-                          id="file-upload"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) setAssignmentFile(file);
-                          }}
-                        />
-
-                        <div className="flex gap-2">
-                          <label
-                            htmlFor="file-upload"
-                            className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md"
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Notes File
+                        </label>
+                        <div className="space-y-3">
+                          <div
+                            onClick={() => document.getElementById("file-upload").click()}
+                            className={`border-2 border-dashed rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                              assignmentFile
+                                ? "border-green-400 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20"
+                                : "border-gray-300 dark:border-gray-600 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-100 hover:to-cyan-100 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/30"
+                            }`}
                           >
-                            <FaUpload size={14} />
-                            Browse Files
-                          </label>
-                          {assignmentFile && (
-                            <button
-                              type="button"
-                              onClick={() => setAssignmentFile(null)}
-                              className="px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600 transition-all shadow-md"
+                            {assignmentFile ? (
+                              <div className="flex items-center gap-3">
+                                <div className="flex-shrink-0">
+                                  {getFileIcon(assignmentFile.name)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    {assignmentFile.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {getFileTypeDisplay(assignmentFile.name)} • {(assignmentFile.size / 1024).toFixed(1)} KB
+                                  </p>
+                                </div>
+                                <FaCheckCircle className="text-green-500 text-lg flex-shrink-0" />
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-3">
+                                <FaCloudUploadAlt className="text-3xl text-blue-400 dark:text-cyan-400 flex-shrink-0" />
+                                <div className="flex flex-col">
+                                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Click to upload notes file
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    PDF, DOC, Images, Archives supported
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <input
+                            type="file"
+                            id="file-upload"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) setAssignmentFile(file);
+                            }}
+                          />
+
+                          <div className="flex gap-2">
+                            <label
+                              htmlFor="file-upload"
+                              className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md"
                             >
-                              Clear
-                            </button>
-                          )}
+                              <FaUpload size={14} />
+                              Browse Files
+                            </label>
+                            {assignmentFile && (
+                              <button
+                                type="button"
+                                onClick={() => setAssignmentFile(null)}
+                                className="px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600 transition-all shadow-md"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Action Buttons */}

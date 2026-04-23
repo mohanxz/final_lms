@@ -8,6 +8,8 @@ const Note = require('../models/Note');
 const Quiz = require('../models/Quiz'); // Quiz uses noteId
 const CodingQuestion = require('../models/Code'); // CodingQuestion uses noteId
 const CodeSubmission = require('../models/CodeSubmission'); // Assuming CodeSubmission model exists
+const Practical = require('../models/Practical');
+const PracticalSubmission = require('../models/PracticalSubmission');
 const verifyAccessToken = require('../middleware/auth');
 // GET student's batch details
 router.get('/batch/:studentId', verifyAccessToken, async (req, res) => {
@@ -136,9 +138,17 @@ router.get('/batch/overview/:batchId/:studentId', verifyAccessToken, async (req,
     // For each note, fetch quiz, coding question, and coding submission status
     const quizzesMap = {};
     const codingQuestionsMap = {};
+    const practicalsMap = {};
 
     for (const module in notesByModule) {
       for (const note of [...notesByModule[module].today, ...notesByModule[module].others]) {
+        // Practical check
+        if (note.type === 'practical') {
+          const submission = await PracticalSubmission.findOne({ noteId: note._id, studentId });
+          practicalsMap[note._id] = {
+            submitted: !!submission
+          };
+        }
         // Quiz (correct field: noteId)
         const quiz = await Quiz.findOne({ noteId: note._id }).lean();
         if (quiz?._id) quizzesMap[note._id] = quiz;
@@ -172,6 +182,7 @@ router.get('/batch/overview/:batchId/:studentId', verifyAccessToken, async (req,
       notesMap: notesByModule,
       quizzesMap,
       codingQuestionsMap,
+      practicalsMap,
       latestModule
     });
   } catch (err) {
@@ -180,5 +191,15 @@ router.get('/batch/overview/:batchId/:studentId', verifyAccessToken, async (req,
   }
 });
 
+router.get('/practical-status/:batchId', verifyAccessToken, async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    const practicalNote = await Note.findOne({ batch: batchId, type: "practical" });
+    res.json({ hasPractical: !!practicalNote });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
 
 module.exports = router;

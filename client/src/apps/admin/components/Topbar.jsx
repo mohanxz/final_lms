@@ -197,7 +197,7 @@ export default function Topbar({
         <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
 
         {/* Notifications */}
-        <div className="relative">
+        {/* <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-cyan-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
@@ -226,12 +226,12 @@ export default function Topbar({
               </div>
             </>
           )}
-        </div>
+        </div> */}
 
         {/* Profile */}
         <div className="relative">
           <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            // onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
           >
             <div className="relative overflow-hidden rounded-full">
@@ -249,11 +249,11 @@ export default function Topbar({
               </div>
             </div>
             <span className="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
-              Super Admin
+               Admin
             </span>
           </button>
 
-          {showProfileMenu && (
+          {/* {showProfileMenu && (
             <>
               <div
                 className="fixed inset-0 z-40"
@@ -285,7 +285,7 @@ export default function Topbar({
                 </div>
               </div>
             </>
-          )}
+          )} */}
         </div>
       </div>
 

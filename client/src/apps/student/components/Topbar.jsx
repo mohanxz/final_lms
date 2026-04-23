@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FaBell, FaBars, FaUserCircle, FaCog } from 'react-icons/fa';
 import lightLogo from "../assets/cybernautLogo.webp";
 import darkLogo from "../assets/cybernautEdTechDarkLogo.webp";
+import ThemeToggle from "../../../shared/ThemeToggle";
 
 export default function Topbar({ pageTitle = "Dashboard", userName = "Student", darkMode, setDarkMode, toggleSidebar }) {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -211,8 +212,9 @@ export default function Topbar({ pageTitle = "Dashboard", userName = "Student", 
 
       {/* Right Section */}
       <div className="flex items-center gap-1 sm:gap-2">
+        <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
         {/* Notifications */}
-        <div className="relative">
+        {/* <div className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative p-2 text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-cyan-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
@@ -241,12 +243,12 @@ export default function Topbar({ pageTitle = "Dashboard", userName = "Student", 
               </div>
             </>
           )}
-        </div>
+        </div> */}
 
         {/* Welcome Message & Profile */}
         <div className="relative">
           <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            // onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
           >
             <div className="relative overflow-hidden rounded-full">
@@ -268,7 +270,7 @@ export default function Topbar({ pageTitle = "Dashboard", userName = "Student", 
             </span>
           </button>
 
-          {showProfileMenu && (
+          {/* {showProfileMenu && (
             <>
               <div
                 className="fixed inset-0 z-40"
@@ -300,7 +302,7 @@ export default function Topbar({ pageTitle = "Dashboard", userName = "Student", 
                 </div>
               </div>
             </>
-          )}
+          )} */}
         </div>
       </div>
 

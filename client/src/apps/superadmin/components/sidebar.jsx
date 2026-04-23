@@ -16,7 +16,7 @@ const menuItems = [
   { id: "batches", icon: <FaFolderPlus />, label: "Batch Management", path: "/superadmin/batches" },
   { id: "students", icon: <FaUsers />, label: "Student Management", path: "/superadmin/students" },
   { id: "salary", icon: <FaMoneyBill />, label: "Salary Management", path: "/superadmin/salary" },
-  { id: "communication", icon: <FaEnvelope />, label: "Communication", path: "/superadmin/communication" },
+  { id: "Chat", icon: <FaEnvelope />, label: "Chat", path: "/superadmin/communication" },
   { id: "analytics", icon: <FaChartPie />, label: "Analytics", path: "/superadmin/analytics" },
   { id: "settings", icon: <FaCog />, label: "Profile", path: "/superadmin/settings" },
 ];

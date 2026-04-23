@@ -51,9 +51,9 @@ exports.submitDriveLink = async (req, res) => {
 
     // ✅ Auto scoring
     let marks = 0;
-    if (assignmentNumber === 1) marks = 33;
-    else if (assignmentNumber === 2) marks = 33;
-    else if (assignmentNumber === 3) marks = 34;
+    if (assignmentNumber === 1) marks = 15;
+    else if (assignmentNumber === 2) marks = 15;
+    else if (assignmentNumber === 3) marks = 20;
 
     // 🔍 Find or create report for that day
     let report = await Report.findOne({
