@@ -85,17 +85,41 @@ const Payment = () => {
       const data = salaryRes.data || [];
       setRows(data);
 
-      const pendingAmount = data
+      // Calculate stats directly from the data to ensure consistency
+      const paidCount = data.filter(row => row.salaryStatus === "paid").length;
+      const pendingCount = data.filter(row => row.salaryStatus === "pending").length;
+      
+      const totalSpent = data
+        .filter(row => row.salaryStatus === "paid")
+        .reduce((sum, row) => sum + (row.salary || 0), 0);
+      
+      const totalPendingAmount = data
         .filter(row => row.salaryStatus === "pending")
         .reduce((sum, row) => sum + (row.salary || 0), 0);
 
+      // Get unique admins count
+      const uniqueAdmins = new Set(data.map(row => row.adminId)).size;
+
       setStats({
-        totalSpent: statsRes.data.totalSpent || 0,
-        paidCount: statsRes.data.paidCount || 0,
-        pendingCount: statsRes.data.pendingCount || 0,
-        totalAdmins: data.length,
-        totalPendingAmount: pendingAmount,
+        totalSpent,
+        paidCount,
+        pendingCount,
+        totalAdmins: uniqueAdmins,
+        totalPendingAmount,
       });
+
+      // Optionally use backend stats if they're more accurate
+      // But recalculate from data for consistency
+      if (statsRes.data) {
+        console.log("Backend stats:", statsRes.data);
+        console.log("Calculated stats:", {
+          totalSpent,
+          paidCount,
+          pendingCount,
+          totalAdmins: uniqueAdmins,
+          totalPendingAmount,
+        });
+      }
 
     } catch (err) {
       console.error("Fetch error:", err);
@@ -180,7 +204,9 @@ const Payment = () => {
     }
 
     setBulkUpdating(true);
-    const selectedItems = rows.filter((_, index) => selectedRows.has(index));
+    // Get actual row indices from filtered rows
+    const selectedIndices = Array.from(selectedRows);
+    const selectedItems = selectedIndices.map(index => filteredRows[index]);
 
     try {
       const token = localStorage.getItem("token");
@@ -445,14 +471,14 @@ const Payment = () => {
                 <button
                   onClick={() => handleBulkUpdate("credited")}
                   disabled={bulkUpdating}
-                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition disabled:opacity-50 shadow-md flex items-center gap-2"
+                  className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition disabled:opacity-50 shadow-md flex items-center gap-2 text-sm"
                 >
                   <FaCheck /> Bulk Pay
                 </button>
                 <button
                   onClick={() => handleBulkUpdate("pending")}
                   disabled={bulkUpdating}
-                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl hover:from-red-600 hover:to-rose-600 transition disabled:opacity-50 shadow-md flex items-center gap-2"
+                  className="px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl hover:from-red-600 hover:to-rose-600 transition disabled:opacity-50 shadow-md flex items-center gap-2 text-sm"
                 >
                   <FaBan /> Bulk Revert
                 </button>
@@ -478,7 +504,7 @@ const Payment = () => {
                   <th className="p-4 text-left font-semibold">Admin</th>
                   <th className="p-4 text-left font-semibold">Batch</th>
                   <th className="p-4 text-left font-semibold">Module</th>
-                  <th className="p-4 text-left font-semibold">Salary</th>
+                  <th className="p-4 text-left font-semibold">Salary (₹)</th>
                   <th className="p-4 text-left font-semibold">Payment Status</th>
                   <th className="p-4 text-left font-semibold">Actions</th>
                 </tr>
@@ -492,7 +518,7 @@ const Payment = () => {
 
                     return (
                       <motion.tr
-                        key={index}
+                        key={rowKey}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
@@ -528,7 +554,7 @@ const Payment = () => {
                         </td>
                         <td className="p-4">
                           <div className="flex items-center gap-1 font-bold text-gray-800 dark:text-white">
-                            <FaRupeeSign className="text-green-500" />
+                            <FaRupeeSign className="text-green-500 text-xs" />
                             {row.salary?.toLocaleString() || 0}
                           </div>
                         </td>

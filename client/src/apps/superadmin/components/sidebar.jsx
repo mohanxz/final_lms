@@ -17,7 +17,7 @@ const menuItems = [
   { id: "students", icon: <FaUsers />, label: "Student Management", path: "/superadmin/students" },
   { id: "salary", icon: <FaMoneyBill />, label: "Salary Management", path: "/superadmin/salary" },
   { id: "Chat", icon: <FaEnvelope />, label: "Chat", path: "/superadmin/communication" },
-  { id: "analytics", icon: <FaChartPie />, label: "Analytics", path: "/superadmin/analytics" },
+  // { id: "analytics", icon: <FaChartPie />, label: "Analytics", path: "/superadmin/analytics" },
   { id: "settings", icon: <FaCog />, label: "Profile", path: "/superadmin/settings" },
 ];
 

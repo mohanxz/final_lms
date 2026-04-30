@@ -4,10 +4,7 @@ import { io } from "socket.io-client";
 import { FaSearch, FaUserCircle, FaUsers, FaComments, FaBars, FaArrowLeft, FaEllipsisV, FaTimes, FaEnvelope, FaPhone } from "react-icons/fa";
 import { encryptMessage, decryptMessage } from "../../../utils/crypto";
 
-
 const SuperAdminChat = () => {
-
-  
   const sender = "superadmin";
   const [courseFilter, setCourseFilter] = useState("All");
   const [filterType, setFilterType] = useState("all");
@@ -23,7 +20,8 @@ const SuperAdminChat = () => {
   const [showStaffList, setShowStaffList] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [allAdminDetails, setAllAdminDetails] = useState([]);
-  
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState("");
 
   const room =
     chatType === "forum" && selectedTarget
@@ -32,24 +30,21 @@ const SuperAdminChat = () => {
       ? `admins/${encodeURIComponent(selectedTarget.trim())}`
       : null;
 
-    const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState(null);
 
-useEffect(() => {
-  const newSocket = io(import.meta.env.VITE_CHAT_API); // or your API URL
-  setSocket(newSocket);
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_CHAT_API);
+    setSocket(newSocket);
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
-  return () => {
-    newSocket.disconnect();
-  };
-}, []);
-
-
-  // Fetch Forum Rooms based on Specialisations (Modules) from Course Management
+  // Fetch Forum Rooms
   useEffect(() => {
     const fetchSpecialisationForums = async () => {
       try {
         const token = localStorage.getItem("token");
-        // Fetch all courses to extract unique specialisations (modules) from SuperAdmin API
         const { data: courses } = await axios.get(`${import.meta.env.VITE_SUPERADMIN_API}/api/courses`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -76,7 +71,6 @@ useEffect(() => {
 
         setForumRooms(allRooms);
 
-        // Auto-select first forum chat if nothing is selected yet
         if (!selectedTarget && allRooms.length > 0) {
           setChatType("forum");
           setSelectedTarget(allRooms[0].roomPath);
@@ -107,7 +101,6 @@ useEffect(() => {
         });
         setAdminStatus(statusMap);
 
-        // Default selection
         if (!selectedTarget && allAdmins.length > 0) {
           setChatType("admin");
           setSelectedTarget(allAdmins[0]);
@@ -119,7 +112,7 @@ useEffect(() => {
     fetchAdmins();
   }, []);
 
-  // Fetch Full Admin Details for Staff List
+  // Fetch Full Admin Details
   useEffect(() => {
     const fetchAdminDetails = async () => {
       try {
@@ -134,9 +127,6 @@ useEffect(() => {
     };
     fetchAdminDetails();
   }, []);
-
-  const [editingId, setEditingId] = useState(null);
-  const [editValue, setEditValue] = useState("");
 
   useEffect(() => {
     if (!room) return;
@@ -158,7 +148,7 @@ useEffect(() => {
   }, [room]);
 
   useEffect(() => {
-    chatRef.current?.scrollTo(0, chatRef.current.scrollHeight);
+    chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
@@ -176,7 +166,7 @@ useEffect(() => {
       } catch (e) {
         console.error("Status polling failed:", e);
       }
-    }, 20000); // 20 seconds
+    }, 20000);
 
     return () => clearInterval(interval);
   }, []);
@@ -210,323 +200,322 @@ useEffect(() => {
     setMessages([]);
     setShowDropdown(false);
     setShowStaffList(false);
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 1024) {
       setChatListVisible(false);
     }
   };
 
-  
-
-  const filteredChats = () => {
-    if (filterType === "admins") return admins.map((a) => ({ name: a, type: "admin" }));
-    if (filterType === "forums")
-      return forumRooms
-        .map((r) => ({ name: r.name, path: r.roomPath, type: "forum" }));
-
-    return [
-      ...admins.map((a) => ({ name: a, type: "admin" })),
-      ...forumRooms
-        .map((r) => ({ name: r.name, path: r.roomPath, type: "forum" })),
-    ];
-  };
-
   return (
-    <>
-      <div className="p-0 m-0 flex h-[calc(100vh-5rem)] bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white">
-        {/* Chat List Sidebar */}
-        <div className={`${isChatListVisible ? 'flex' : 'hidden'} md:flex w-full md:w-1/3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 p-4 md:p-6 shadow-lg flex-col`}>
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <FaSearch className="absolute left-4 top-3.5 text-gray-400 dark:text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              className="w-full bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-200"
+    <div className="flex h-[calc(100vh-6rem)] bg-gray-50 dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800">
+      {/* Sidebar */}
+      <div className={`w-full lg:w-80 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col ${!isChatListVisible && window.innerWidth < 1024 ? "hidden" : "flex"}`}>
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <FaComments className="text-blue-500" />
+            Communications
+          </h2>
+          <div className="mt-4 relative">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <input 
+              type="text" 
+              placeholder="Search chats..." 
+              className="w-full bg-gray-100 dark:bg-gray-900 border-none rounded-xl py-2 pl-9 pr-4 text-sm focus:ring-2 focus:ring-blue-500 dark:text-white"
             />
           </div>
+        </div>
 
-          {/* Filter Tabs */}
-          <div className="flex space-x-1 mb-6 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+        {/* Filter Tabs */}
+        <div className="px-4 py-3">
+          <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-xl">
             {["All", "Groups", "Admins"].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setCourseFilter(filter)}
-                className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 ${
                   courseFilter === filter
-                    ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    ? "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
                 {filter}
               </button>
             ))}
           </div>
-
-          {/* Scrollable Chat List */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Forum Chats */}
-            {["All", "Groups"].includes(courseFilter) && (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Forum Groups</h3>
-                  <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full">
-                    {forumRooms.length}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {forumRooms.map((r) => (
-                    <button
-                      key={r.roomPath}
-                      onClick={() => selectChat("forum", r.roomPath)}
-                      className={`flex items-center space-x-3 w-full text-left p-4 rounded-xl transition-all duration-200 group ${
-                        chatType === "forum" && selectedTarget === r.roomPath
-                          ? "bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 shadow-sm"
-                          : "hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent"
-                      }`}
-                    >
-                      <div className={`p-2 rounded-lg ${
-                        chatType === "forum" && selectedTarget === r.roomPath
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30"
-                      }`}>
-                        <FaUsers className="text-sm" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900 dark:text-white truncate">{r.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 truncate">Specialisation Forum</div>
-                      </div>
-                      {chatType === "forum" && selectedTarget === r.roomPath && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* Admin Chats */}
-            {["All", "Admins"].includes(courseFilter) && (
-              <>
-                <div className="flex items-center justify-between mt-8 mb-4">
-                  <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Admins</h3>
-                  <span className="text-xs bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400 px-2 py-1 rounded-full">
-                    {admins.length}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {admins.map((admin) => (
-                    <button
-                      key={admin}
-                      onClick={() => selectChat("admin", admin)}
-                      className={`flex items-center space-x-3 w-full text-left p-4 rounded-xl transition-all duration-200 group ${
-                        chatType === "admin" && selectedTarget === admin
-                          ? "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 shadow-sm"
-                          : "hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent"
-                      }`}
-                    >
-                      <div className="relative">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-sm ${
-                          chatType === "admin" && selectedTarget === admin
-                            ? "bg-gradient-to-br from-green-500 to-emerald-600"
-                            : "bg-gradient-to-br from-gray-500 to-gray-600 group-hover:from-green-500 group-hover:to-emerald-600"
-                        }`}>
-                          {admin[0].toUpperCase()}
-                        </div>
-                        {adminStatus[admin] && (
-                          <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full shadow-sm"></span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900 dark:text-white truncate">{admin}</div>
-                        <div className={`text-sm font-medium ${adminStatus[admin] ? "text-green-500 dark:text-green-400" : "text-gray-400 dark:text-gray-500"}`}>
-                          {adminStatus[admin] ? "Online" : "Offline"}
-                        </div>
-                      </div>
-                      {chatType === "admin" && selectedTarget === admin && (
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
         </div>
-        
 
-        {/* Chat Section */}
-        <div className={`${isChatListVisible ? 'hidden' : 'flex'} md:flex w-full md:w-2/3 flex-col bg-white dark:bg-gray-800`}>
-          {room ? (
-            <div className="flex flex-col h-full">
-              <div className="px-4 md:px-6 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="flex items-center justify-between">
-                  {/* Mobile back button */}
-                  <button
-                    onClick={() => setChatListVisible(true)}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white md:hidden"
-                  >
-                    <FaArrowLeft className="w-6 h-6" />
-                  </button>
-                  <div className="flex items-center space-x-3">
-                    {chatType === "forum" ? (
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                        <FaUsers className="text-blue-600 dark:text-blue-400" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                        {selectedTarget[0].toUpperCase()}
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {chatType === "forum" ? forumRooms.find(f => f.roomPath === selectedTarget)?.name || "Forum" : selectedTarget}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {chatType === "forum" ? "Forum Group" : `Admin • ${adminStatus[selectedTarget] ? "Online" : "Offline"}`}
-                      </p>
-                    </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {/* Forum Groups */}
+          {["All", "Groups"].includes(courseFilter) && (
+            <>
+              <div className="px-2 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                Forum Groups
+              </div>
+              {forumRooms.map((r) => (
+                <button
+                  key={r.roomPath}
+                  onClick={() => selectChat("forum", r.roomPath)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${
+                    chatType === "forum" && selectedTarget === r.roomPath
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-100 dark:border-indigo-800"
+                      : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400"
+                  }`}
+                >
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${
+                    chatType === "forum" && selectedTarget === r.roomPath
+                      ? "bg-indigo-500 text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                  }`}>
+                    <FaUsers />
                   </div>
+                  <div className="flex-1 text-left">
+                    <div className="font-bold text-sm truncate">{r.name}</div>
+                    <div className="text-[10px] opacity-70">Group Discussion</div>
+                  </div>
+                  {chatType === "forum" && selectedTarget === r.roomPath && (
+                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                  )}
+                </button>
+              ))}
+            </>
+          )}
 
-                  {/* Top Right Context Menu */}
+          {/* Admin Chats */}
+          {["All", "Admins"].includes(courseFilter) && (
+            <>
+              <div className="px-2 mt-6 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                Direct Messages
+              </div>
+              {admins.map((admin) => (
+                <button
+                  key={admin}
+                  onClick={() => selectChat("admin", admin)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${
+                    chatType === "admin" && selectedTarget === admin
+                      ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800"
+                      : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400"
+                  }`}
+                >
                   <div className="relative">
-                    <button
-                      onClick={() => setShowDropdown(!showDropdown)}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors text-gray-500 dark:text-gray-400"
-                    >
-                      <FaEllipsisV />
-                    </button>
-
-                    {showDropdown && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-                        {chatType === "forum" && (
-                          <button
-                            onClick={() => {
-                              setShowStaffList(true);
-                              setShowDropdown(false);
-                            }}
-                            className="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-200 flex items-center gap-3 transition-colors"
-                          >
-                            <FaUsers className="text-blue-500" />
-                            View Staff List
-                          </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            setMessages([]);
-                            setShowDropdown(false);
-                          }}
-                          className="w-full text-left px-4 py-3 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 flex items-center gap-3 transition-colors"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Clear Conversation
-                        </button>
-                      </div>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold ${
+                      chatType === "admin" && selectedTarget === admin
+                        ? "bg-gradient-to-br from-blue-500 to-indigo-600"
+                        : "bg-gradient-to-br from-gray-500 to-gray-600"
+                    }`}>
+                      {admin[0].toUpperCase()}
+                    </div>
+                    {adminStatus[admin] && (
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-950 rounded-full"></span>
                     )}
                   </div>
-                </div>
-              </div>
-
-              <div className="flex-1 p-6 overflow-y-auto bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 space-y-4 flex flex-col" ref={chatRef}>
-                {messages.map((m, i) => {
-                  const isSender = m.name === sender;
-                  const timeSince = (new Date() - new Date(m.timestamp)) / 1000 / 60;
-                  const canEdit = isSender && timeSince < 2;
-
-                  return (
-                    <div
-                      key={m._id || i}
-                      className={`flex ${
-                        isSender ? "justify-end" : "justify-start"
-                      }`}
-                    >
-                      <div className={`flex flex-col max-w-xs lg:max-w-md ${isSender ? "items-end" : "items-start"}`}>
-                        {!isSender && (
-                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1 ml-3">
-                            {m.name}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                           {isSender && canEdit && !editingId && (
-                             <button onClick={() => handleEdit(m)} className="text-blue-500 text-[10px] hover:underline">Edit</button>
-                           )}
-                           {m.edited && <span className="text-[10px] text-gray-400 italic">(edited)</span>}
-                        </div>
-                        
-                        {editingId === m._id ? (
-                           <div className="flex flex-col gap-2 w-full">
-                             <textarea
-                               value={editValue}
-                               onChange={(e) => setEditValue(e.target.value)}
-                               className="w-full p-2 bg-white dark:bg-gray-700 border rounded text-sm"
-                             />
-                             <div className="flex gap-2 justify-end">
-                               <button onClick={() => setEditingId(null)} className="text-xs text-red-500">Cancel</button>
-                               <button onClick={saveEdit} className="text-xs text-green-500 font-bold">Save</button>
-                             </div>
-                           </div>
-                        ) : (
-                          <div
-                            className={`px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap break-words shadow-sm ${
-                              isSender
-                                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md"
-                                : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-bl-md"
-                            }`}
-                          >
-                            {decryptMessage(m.message)}
-                          </div>
-                        )}
-                        <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 mx-3">
-                          {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                      </div>
+                  <div className="flex-1 text-left">
+                    <div className="font-bold text-sm truncate">{admin}</div>
+                    <div className={`text-[10px] font-medium ${
+                      adminStatus[admin] ? "text-green-500" : "text-gray-400"
+                    }`}>
+                      {adminStatus[admin] ? "Online" : "Offline"}
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="p-6 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                <div className="flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 rounded-2xl p-2">
-                  <input
-                    className="flex-1 bg-transparent text-gray-900 dark:text-white px-4 py-3 focus:outline-none placeholder-gray-500 dark:placeholder-gray-400"
-                    placeholder="Type your message..."
-                    value={msg}
-                    onChange={(e) => setMsg(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                  />
-                  <button
-                    onClick={sendMessage}
-                    disabled={!msg.trim()}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white p-3 rounded-xl transition-all duration-200 shadow-sm disabled:cursor-not-allowed"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 p-8">
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center mb-6">
-                <FaComments className="text-4xl text-blue-500 dark:text-blue-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Welcome to SuperAdmin Chat</h3>
-              <p className="text-center text-gray-500 dark:text-gray-400 max-w-md">
-                Select a conversation from the sidebar to start chatting with admins or join forum discussions.
-              </p>
-            </div>
+                  </div>
+                  {chatType === "admin" && selectedTarget === admin && (
+                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                  )}
+                </button>
+              ))}
+            </>
           )}
         </div>
       </div>
+
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col bg-white dark:bg-gray-950 relative">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-white/80 dark:bg-gray-950/80 backdrop-blur-md z-10">
+          <div className="flex items-center gap-4">
+            {/* Mobile back button */}
+            <button
+              onClick={() => setChatListVisible(true)}
+              className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white lg:hidden"
+            >
+              <FaArrowLeft />
+            </button>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+              chatType === "forum"
+                ? "bg-gradient-to-br from-purple-500 to-pink-600"
+                : "bg-gradient-to-br from-blue-500 to-indigo-600"
+            }`}>
+              {chatType === "forum" ? <FaUsers /> : selectedTarget?.[0]?.toUpperCase()}
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white leading-tight">
+                {chatType === "forum"
+                  ? forumRooms.find(f => f.roomPath === selectedTarget)?.name || "Forum"
+                  : selectedTarget}
+              </h3>
+              <div className="flex items-center gap-2 mt-1">
+                <span className={`w-2 h-2 rounded-full ${chatType === "forum" ? "bg-purple-500" : "bg-green-500"} animate-pulse`}></span>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">
+                  {chatType === "forum" ? "Group Channel" : adminStatus[selectedTarget] ? "Online" : "Offline"}
+                </span>
+                {chatType === "forum" && (
+                  <button 
+                    onClick={() => setShowStaffList(true)}
+                    className="ml-2 text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded hover:bg-blue-200 transition-colors font-bold uppercase"
+                  >
+                    View Members
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Dropdown Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-white/5 rounded-xl transition-colors text-gray-500 dark:text-gray-400"
+            >
+              <FaEllipsisV />
+            </button>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden">
+                {chatType === "forum" && (
+                  <button
+                    onClick={() => {
+                      setShowStaffList(true);
+                      setShowDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-700 dark:text-gray-200 flex items-center gap-3 transition-colors"
+                  >
+                    <FaUsers className="text-blue-500" />
+                    View Staff List
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setMessages([]);
+                    setShowDropdown(false);
+                  }}
+                  className="w-full text-left px-4 py-3 text-sm hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 flex items-center gap-3 transition-colors"
+                >
+                  <FaTimes className="text-red-500" />
+                  Clear Conversation
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div
+          ref={chatRef}
+          className="flex-1 overflow-y-auto px-6 py-8 space-y-6 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] dark:opacity-40"
+          style={{ backgroundSize: '100px' }}
+        >
+          {messages.length > 0 ? (
+            messages.map((m, i) => {
+              const isSender = m.name === sender;
+              const timeSince = (new Date() - new Date(m.timestamp)) / 1000 / 60;
+              const canEdit = isSender && timeSince < 2;
+
+              return (
+                <div
+                  key={m._id || i}
+                  className={`flex flex-col ${isSender ? "items-end" : "items-start"}`}
+                >
+                  <div className={`flex items-center gap-2 mb-2 ${isSender ? "flex-row-reverse" : "flex-row"}`}>
+                    <div className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tighter">
+                      {isSender ? "You" : m.name}
+                    </div>
+                    <div className="text-[9px] text-gray-400 px-1">
+                      {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    {canEdit && !editingId && (
+                      <button onClick={() => handleEdit(m)} className="text-[10px] text-blue-500 hover:text-blue-600 font-bold transition-colors">
+                        Edit
+                      </button>
+                    )}
+                    {m.edited && <span className="text-[10px] text-gray-400 italic font-medium">(modified)</span>}
+                  </div>
+                  
+                  {editingId === m._id ? (
+                    <div className="flex flex-col gap-3 w-full max-w-md bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-xl border border-blue-200 dark:border-blue-900">
+                      <textarea
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="w-full p-3 bg-gray-50 dark:bg-gray-900 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-500 dark:text-white min-h-[80px]"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="px-4 py-1.5 text-xs text-gray-500 font-bold hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={saveEdit}
+                          className="px-4 py-1.5 text-xs bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-600 shadow-md transition-all"
+                        >
+                          Save Changes
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      className={`relative max-w-[85%] lg:max-w-xl px-5 py-3.5 rounded-2xl text-sm leading-relaxed shadow-sm transition-all duration-300 hover:shadow-md ${
+                        isSender
+                          ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-tr-none"
+                          : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-tl-none"
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap break-words">
+                        {decryptMessage(m.message)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center opacity-40">
+              <div className="w-20 h-20 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center text-3xl mb-4">
+                <FaComments />
+              </div>
+              <p className="text-sm font-medium">No messages yet. Start the conversation!</p>
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
+        <div className="p-6 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
+          <div className="max-w-4xl mx-auto relative flex items-center gap-3 bg-gray-100 dark:bg-gray-900 p-2 rounded-2xl border border-transparent focus-within:border-blue-500/50 focus-within:bg-white dark:focus-within:bg-gray-950 transition-all duration-300">
+            <input
+              value={msg}
+              onFocus={() => chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" })}
+              onChange={(e) => setMsg(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              className="flex-1 bg-transparent border-none px-4 py-2 text-sm outline-none text-gray-900 dark:text-white placeholder:text-gray-400"
+              placeholder={`Message ${chatType === "forum" ? "forum" : selectedTarget}...`}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!msg.trim()}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Staff List Modal */}
       {showStaffList && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-bold text-white">Staff Specialists</h3>
+                <h3 className="text-xl font-bold text-white">Staff Directory</h3>
                 <p className="text-blue-100 text-sm mt-1">
                   {forumRooms.find(f => f.roomPath === selectedTarget)?.moduleName} specialists
                 </p>
@@ -544,13 +533,9 @@ useEffect(() => {
                 .filter(admin => {
                   const currentMod = forumRooms.find(f => f.roomPath === selectedTarget)?.moduleName;
                   if (!currentMod) return false;
-                  
-                  // If global "All Admins" group, show everyone
                   if (currentMod === "All Admins") return true;
                   
-                  // Helper to normalize strings (remove spaces around slashes, lowercase)
                   const normalize = (str) => (str || "").toLowerCase().replace(/\s+/g, '').trim();
-                  
                   const targetNorm = normalize(currentMod);
                   return admin.specialisation?.some(s => normalize(s) === targetNorm);
                 })
@@ -569,25 +554,27 @@ useEffect(() => {
                           <FaEnvelope className="text-blue-400" />
                           <span className="truncate">{admin.email}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                          <FaPhone className="text-green-400" />
-                          <span>{admin.phone}</span>
-                        </div>
+                        {admin.phone && (
+                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <FaPhone className="text-green-400" />
+                            <span>{admin.phone}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))}
               
               {allAdminDetails.filter(admin => {
-                  const currentMod = forumRooms.find(f => f.roomPath === selectedTarget)?.moduleName;
-                  if (currentMod === "All Admins") return true;
-                  return admin.specialisation?.some(s => s.trim().toLowerCase() === currentMod?.trim().toLowerCase());
-                }).length === 0 && (
+                const currentMod = forumRooms.find(f => f.roomPath === selectedTarget)?.moduleName;
+                if (currentMod === "All Admins") return true;
+                return admin.specialisation?.some(s => s.trim().toLowerCase() === currentMod?.trim().toLowerCase());
+              }).length === 0 && (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <FaUsers className="text-gray-400 text-2xl" />
                   </div>
-                  <p className="text-gray-500 dark:text-gray-400">No specialists assigned to this module yet.</p>
+                  <p className="text-gray-500 dark:text-gray-400">No specialists assigned yet.</p>
                 </div>
               )}
             </div>
@@ -596,14 +583,14 @@ useEffect(() => {
               <button
                 onClick={() => setShowStaffList(false)}
                 className="px-6 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
+              >
                 Close
               </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import API from "../api";
 import {
   FaPlus,
@@ -28,8 +27,6 @@ import {
   FaEye,
 } from "react-icons/fa";
 import {
-  MdAssignment,
-  MdOutlineGrade,
   MdOutlineMenuBook,
 } from "react-icons/md";
 import { toast } from "react-toastify";
@@ -168,7 +165,7 @@ const AdminNoteCard = ({
         </div>
       </div>
 
-      {/* Resources Section - UPDATED: "View Notes" instead of "Assignment File" */}
+      {/* Resources Section */}
       {(note.assignmentlink || note.assignmentS3Url) && (
         <div className="px-5 pb-3">
           <div className="flex flex-wrap gap-2">
@@ -216,7 +213,7 @@ const AdminNoteCard = ({
         </div>
       )}
 
-      {/* Action Buttons - REMOVED Evaluate button */}
+      {/* Action Buttons */}
       <div className="px-5 pb-5">
         <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
           <div className={`${["seminar", "theory", "hackerrank"].includes(note.type) ? "grid-cols-1" : "grid-cols-2"} grid gap-2`}>
@@ -273,7 +270,35 @@ export default function LessonPlan() {
   const [loading, setLoading] = useState(true);
   const [submissionCounts, setSubmissionCounts] = useState({});
 
+  // Mark as completed states
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [completedModules, setCompletedModules] = useState({});
+
   const token = localStorage.getItem("token");
+
+  // Check completion status for all modules
+  const fetchModuleCompletionStatus = useCallback(async (adminModules) => {
+    try {
+      const res = await API.get(
+        `/api/admin-batches/check-complete/${batchId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (res.data.moduleCompletions) {
+        // Only keep completion status for modules this admin owns
+        const relevantCompletions = {};
+        Object.keys(res.data.moduleCompletions).forEach(module => {
+          if (adminModules.includes(module)) {
+            relevantCompletions[module] = res.data.moduleCompletions[module];
+          }
+        });
+        setCompletedModules(relevantCompletions);
+      }
+    } catch (err) {
+      console.error("Error checking module completion status:", err);
+    }
+  }, [batchId, token]);
 
   const fetchBatchModule = useCallback(async () => {
     setLoading(true);
@@ -299,13 +324,16 @@ export default function LessonPlan() {
       setAdminId(currentAdminId);
       setModules(adminModules);
       setSelectedModule(adminModules[0]);
+      
+      // Fetch completion status for admin's modules
+      await fetchModuleCompletionStatus(adminModules);
     } catch (e) {
       console.error(e);
       navigate("/login");
     } finally {
       setLoading(false);
     }
-  }, [batchId, navigate, token]);
+  }, [batchId, navigate, token, fetchModuleCompletionStatus]);
 
   const fetchNotes = useCallback(async () => {
     if (!selectedModule) return;
@@ -344,6 +372,37 @@ export default function LessonPlan() {
   useEffect(() => {
     fetchNotes();
   }, [fetchNotes]);
+
+  // Handle module completion
+  const handleMarkModuleComplete = async () => {
+    try {
+      const res = await API.patch(
+        `/api/admin-batches/mark-module-complete/${batchId}`,
+        { 
+          module: selectedModule,
+          isCompleted: true 
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success(`Marked "${selectedModule}" module as completed!`);
+      setShowCompleteModal(false);
+      setConfirmText("");
+      
+      // Update local state
+      setCompletedModules(prev => ({
+        ...prev,
+        [selectedModule]: true
+      }));
+    } catch (err) {
+      console.error("Error marking module complete:", err);
+      if (err.response?.status === 404) {
+        toast.error("Module not found or you're not assigned to this module.");
+      } else {
+        toast.error("Something went wrong while marking module as completed.");
+      }
+    }
+  };
 
   const openModalForAdd = () => {
     setEditingNoteId(null);
@@ -484,10 +543,6 @@ export default function LessonPlan() {
   };
 
   const totalLessons = notes.length;
-  const totalSubmissions = Object.values(submissionCounts).reduce(
-    (a, b) => a + b,
-    0,
-  );
 
   if (loading) return <SkeletonLoader />;
 
@@ -527,6 +582,12 @@ export default function LessonPlan() {
                       <FaChartLine className="text-xs" />
                       Lesson Management
                     </span>
+                    {completedModules[selectedModule] && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-400/30 backdrop-blur-sm rounded-full text-green-100 text-xs font-semibold border border-green-400/50">
+                        <FaCheckCircle className="text-xs" />
+                        Module Completed
+                      </span>
+                    )}
                   </div>
                   <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2 drop-shadow-sm">
                     {batchDetails.batchName}
@@ -539,6 +600,10 @@ export default function LessonPlan() {
                     <span className="flex items-center gap-1.5">
                       <FaUserTie className="text-xs" />
                       {modules.length} Modules
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <FaCheckCircle className="text-xs" />
+                      {Object.keys(completedModules).filter(m => completedModules[m]).length} Completed
                     </span>
                   </div>
                 </div>
@@ -553,86 +618,57 @@ export default function LessonPlan() {
                   <p className="text-2xl font-bold text-white">
                     {totalLessons}
                   </p>
-               
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-blue-300 dark:hover:border-cyan-700 group">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                <MdOutlineMenuBook className="text-white text-lg" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Total Lessons
-                </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-white">
-                  {totalLessons}
-                </p>
-              </div>
-            </div>
-          </div>
-      
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-blue-300 dark:hover:border-cyan-700 group">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                <FaLayerGroup className="text-white text-lg" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Modules
-                </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-white">
-                  {modules.length}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-700/50 transition-all hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-700 group">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                <FaFire className="text-white text-lg" />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Active Module
-                </p>
-                <p className="text-xl font-bold text-gray-800 dark:text-white truncate max-w-[100px]">
-                  {selectedModule}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div> */}
-
         <div className="mb-8">
           <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-1.5 shadow-lg border border-gray-200/50 dark:border-gray-700/50 overflow-x-auto">
-            <div className="flex gap-1 min-w-max">
+            <div className="flex gap-1 min-w-max items-center">
               {modules.map((module) => (
                 <button
                   key={module}
                   onClick={() => setSelectedModule(module)}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 relative ${
                     selectedModule === module
                       ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md"
+                      : completedModules[module]
+                      ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-700"
                       : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
                   }`}
                 >
                   <FaLayerGroup className="text-xs" />
                   {module}
+                  {completedModules[module] && (
+                    <FaCheckCircle className="text-xs text-green-500 ml-1" />
+                  )}
                 </button>
               ))}
-              <button
-                onClick={openModalForAdd}
-                className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg group/btn ml-auto"
-              >
-                <FaPlus className="text-xs group-hover/btn:rotate-90 transition-transform" />
-                New Days
-              </button>
+              <div className="flex items-center gap-2 ml-auto">
+                {completedModules[selectedModule] ? (
+                  <div className="px-4 py-2.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-xl font-medium text-sm border border-green-300 dark:border-green-700 flex items-center gap-2 shadow-md">
+                    <FaCheckCircle />
+                    Module Completed
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowCompleteModal(true)}
+                    className="px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg text-sm flex items-center gap-2"
+                  >
+                    <FaCheckCircle className="text-xs" />
+                    Mark Complete
+                  </button>
+                )}
+                <button
+                  onClick={openModalForAdd}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg group/btn"
+                >
+                  <FaPlus className="text-xs group-hover/btn:rotate-90 transition-transform" />
+                  New Days
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -703,7 +739,7 @@ export default function LessonPlan() {
               </p>
               <button
                 onClick={openModalForAdd}
-                className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg group/btn mx-auto"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg group/btn mx-auto"
               >
                 <FaPlus />
                 Create First Lesson
@@ -711,6 +747,61 @@ export default function LessonPlan() {
             </div>
           )}
         </div>
+
+        {/* Module Completion Confirmation Modal */}
+        {showCompleteModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl w-96 shadow-2xl space-y-4 border border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                <FaCheckCircle className="text-green-500" />
+                Confirm Module Completion
+              </h2>
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl p-3">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ This action cannot be undone. Please make sure all lessons for this module are completed.
+                </p>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Type <strong className="text-blue-600 dark:text-blue-400 font-mono">confirm</strong> to mark 
+                <span className="font-medium text-gray-800 dark:text-white bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded mx-1"> 
+                  {selectedModule} 
+                </span> 
+                module as completed.
+              </p>
+              <input
+                type="text"
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded-xl text-sm bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder='Type "confirm" to proceed...'
+                autoFocus
+              />
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowCompleteModal(false);
+                    setConfirmText("");
+                  }}
+                  className="px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirmText.toLowerCase().trim() === "confirm") {
+                      handleMarkModuleComplete();
+                    } else {
+                      toast.error("Please type 'confirm' to proceed.");
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white text-sm font-medium transition-all shadow-md hover:shadow-lg"
+                >
+                  Confirm Completion
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Code Evaluation Modal */}
         {showCodeEvalModal && codeEvalData && (
@@ -724,7 +815,7 @@ export default function LessonPlan() {
         {/* Add/Edit Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl relative animate-fadeIn max-h-[90vh] flex flex-col">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl relative max-h-[90vh] flex flex-col">
               <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-t-2xl flex-shrink-0">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <FaFire className="text-orange-500" />
@@ -740,7 +831,6 @@ export default function LessonPlan() {
 
               <div className="p-6 space-y-5 overflow-y-auto flex-1">
                 <div className={`grid grid-cols-1 ${["seminar", "theory", "practical"].includes(form.type) ? "" : "md:grid-cols-2"} gap-5`}>
-                  {/* Left Column */}
                   <div className="space-y-5">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -787,25 +877,22 @@ export default function LessonPlan() {
                       </select>
                     </div>
 
-                    
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Meet Link
-                        </label>
-                        <div className="relative">
-                          <FaVideo className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-sm" />
-                          <input
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-xl py-3 pl-10 pr-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            placeholder="https://meet.google.com/xyz-abc"
-                            value={form.meetlink}
-                            onChange={(e) => setForm({ ...form, meetlink: e.target.value })}
-                          />
-                        </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Meet Link
+                      </label>
+                      <div className="relative">
+                        <FaVideo className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-sm" />
+                        <input
+                          className="w-full border border-gray-300 dark:border-gray-600 rounded-xl py-3 pl-10 pr-3 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          placeholder="https://meet.google.com/xyz-abc"
+                          value={form.meetlink}
+                          onChange={(e) => setForm({ ...form, meetlink: e.target.value })}
+                        />
                       </div>
-                   
+                    </div>
                   </div>
 
-                  {/* Right Column */}
                   {!["seminar", "theory", "practical"].includes(form.type) && (
                     <div className="space-y-5">
                       <div>
@@ -900,7 +987,6 @@ export default function LessonPlan() {
                   )}
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-3 pt-2 border-t border-gray-200 dark:border-gray-700">
                   <button
                     onClick={() => setShowModal(false)}

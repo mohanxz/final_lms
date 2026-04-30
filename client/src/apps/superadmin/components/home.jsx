@@ -7,7 +7,8 @@ import {
   FaTachometerAlt, FaRocket, FaShieldAlt, FaDatabase, FaServer,
   FaGraduationCap, FaChalkboardTeacher, FaCalendarAlt, FaBell,
   FaArrowRight, FaStar, FaMedal, FaFire, FaCrown, FaCheckCircle,
-  FaClock, FaLayerGroup, FaAward, FaGlobe, FaHeartbeat, FaCloudUploadAlt
+  FaClock, FaLayerGroup, FaAward, FaGlobe, FaHeartbeat, FaCloudUploadAlt,
+  FaSyncAlt
 } from 'react-icons/fa';
 import { MdOutlineEmojiEvents, MdOutlineAnalytics } from 'react-icons/md';
 import { StatCardSkeleton, SystemOverviewSkeleton, FadeIn, SlideUp, LoadingSpinner } from "../../../shared/LoadingComponents";
@@ -20,12 +21,83 @@ const Home = () => {
     totalStudents: 0,
     totalLecturers: 0,
     activeBatches: 0,
+    totalCourses: 0,
   });
 
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isOffline, setIsOffline] = useState(false);
+  
+  // Pending payments state - read from localStorage first
+  const [pendingPayments, setPendingPayments] = useState({
+    count: 0,
+    totalAmount: 0,
+    items: []
+  });
+
+  // Load ALL data from localStorage on component mount
+  const loadAllFromLocalStorage = () => {
+    // Load pending payments
+    const savedPayments = localStorage.getItem('pendingPayments');
+    if (savedPayments) {
+      try {
+        const parsed = JSON.parse(savedPayments);
+        setPendingPayments({
+          count: parsed.count || 0,
+          totalAmount: parsed.totalAmount || 0,
+          items: parsed.items || []
+        });
+      } catch (e) {
+        console.error("Failed to parse pending payments:", e);
+      }
+    }
+
+    // Load admin stats
+    const savedAdminStats = localStorage.getItem('adminStats');
+    if (savedAdminStats) {
+      try {
+        const parsed = JSON.parse(savedAdminStats);
+        setStats(prev => ({
+          ...prev,
+          totalLecturers: parsed.totalAdmins || 0,
+          activeBatches: parsed.totalBatches || 0,
+        }));
+      } catch (e) {
+        console.error("Failed to parse admin stats:", e);
+      }
+    }
+
+    // Load admins data
+    const savedAdmins = localStorage.getItem('admins');
+    if (savedAdmins) {
+      try {
+        const admins = JSON.parse(savedAdmins);
+        setStats(prev => ({
+          ...prev,
+          totalLecturers: admins.length || prev.totalLecturers,
+          activeBatches: admins.reduce((acc, a) => acc + (a.batchCount || 0), 0),
+        }));
+      } catch (e) {
+        console.error("Failed to parse admins:", e);
+      }
+    }
+
+    // Load modules
+    const savedModules = localStorage.getItem('modules');
+    if (savedModules) {
+      try {
+        const modules = JSON.parse(savedModules);
+        setStats(prev => ({
+          ...prev,
+          totalCourses: modules.length || 0,
+        }));
+      } catch (e) {
+        console.error("Failed to parse modules:", e);
+      }
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -33,23 +105,53 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    // Load localStorage data FIRST for instant display
+    loadAllFromLocalStorage();
+    
+    // Then fetch fresh data from API
     const fetchData = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
         const token = localStorage.getItem('token');
-        const [overviewRes, statsRes] = await Promise.all([
-          API.get("/api/system/overview", { headers: { Authorization: `Bearer ${token}` } }),
-          API.get('/api/stats', { headers: { Authorization: `Bearer ${token}` } })
+        
+        const [overviewRes, statsRes, salaryRes] = await Promise.all([
+          API.get("/api/system/overview", { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+          API.get('/api/stats', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
+          API.get('/api/salary', { headers: { Authorization: `Bearer ${token}` } }).catch(() => null)
         ]);
-        setOverview(overviewRes.data);
-        setStats(statsRes.data);
+        
+        // Update overview
+        if (overviewRes) {
+          setOverview(overviewRes.data);
+        }
+        
+        // Update stats from API
+        if (statsRes) {
+          setStats(statsRes.data);
+        }
+        
+        // Update pending payments from salary API
+        if (salaryRes) {
+          const allSalaryItems = salaryRes.data || [];
+          const pendingItems = allSalaryItems.filter(item => item.salaryStatus === "pending");
+          const pendingAmount = pendingItems.reduce((sum, item) => sum + (Number(item.salary) || 0), 0);
+          
+          const pendingData = {
+            count: pendingItems.length,
+            totalAmount: pendingAmount,
+            items: pendingItems,
+            lastUpdated: new Date().toISOString()
+          };
+          
+          setPendingPayments(pendingData);
+          localStorage.setItem('pendingPayments', JSON.stringify(pendingData));
+        }
+        
+        setIsOffline(false);
+        
       } catch (err) {
-        console.error("Failed to load data", err);
-        setError("Failed to load dashboard data. Please try again.");
+        console.error("Failed to load API data:", err);
+        setIsOffline(true);
+        setError("Showing cached data. Some information may be outdated.");
       } finally {
         setLoading(false);
       }
@@ -80,6 +182,15 @@ const Home = () => {
       month: 'long', 
       day: 'numeric' 
     });
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount || 0);
   };
 
   if (loading) {
@@ -122,34 +233,6 @@ const Home = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
-        <div className="max-w-screen mx-auto">
-          <FadeIn>
-            <div className="text-center">
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 max-w-md mx-auto">
-                <div className="text-red-600 dark:text-red-400 mb-4">
-                  <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-3">Error Loading Dashboard</h3>
-                <p className="text-red-600 dark:text-red-400 mb-6">{error}</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all shadow-md hover:shadow-lg group/btn"
-                >
-                  Try Again
-                </button>
-              </div>
-            </div>
-          </FadeIn>
-        </div>
-      </div>
-    );
-  }
-
   const totalRevenue = stats.totalStudents * 5000;
   const completionRate = stats.activeBatches > 0 ? Math.min(85, 60 + stats.activeBatches * 5) : 72;
 
@@ -164,6 +247,16 @@ const Home = () => {
 
       <div className="relative z-10 p-6 lg:p-8">
         <div className="max-w-screen mx-auto">
+          {/* Offline/Cached Data Banner */}
+          {isOffline && (
+            <FadeIn>
+              <div className="mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 flex items-center gap-3">
+                <FaSyncAlt className="text-amber-500 animate-spin" />
+                <p className="text-sm text-amber-700 dark:text-amber-300">Showing cached data. Live data unavailable.</p>
+              </div>
+            </FadeIn>
+          )}
+
           {/* Hero Section with Welcome Banner */}
           <FadeIn delay={100}>
             <div className="relative mb-10 overflow-hidden rounded-3xl bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 shadow-2xl">
@@ -196,6 +289,12 @@ const Home = () => {
                         <p className="text-blue-100 text-xs">Today's Date</p>
                         <p className="text-white font-semibold text-sm">{formatDate()}</p>
                       </div>
+                      {isOffline && (
+                        <div className="bg-gradient-to-r from-amber-500/30 to-orange-500/30 backdrop-blur-md rounded-xl px-4 py-2 border border-amber-400/30">
+                          <p className="text-amber-100 text-xs">Data Source</p>
+                          <p className="text-white font-semibold text-sm">Cached (Local)</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -212,7 +311,7 @@ const Home = () => {
             </div>
           </FadeIn>
 
-          {/* Stats Cards Grid */}
+          {/* Stats Cards Grid - ALL values from localStorage */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             <SlideUp delay={150}>
               <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200/50 dark:border-gray-700/50">
@@ -271,21 +370,38 @@ const Home = () => {
               </div>
             </SlideUp>
 
+            {/* Pending Payments - From localStorage */}
             <SlideUp delay={300}>
-              <div className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-200/50 dark:border-gray-700/50">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative p-5 flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                    <FaMoneyBill className="text-2xl text-white" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Total Revenue</p>
-                    <p className="text-2xl font-bold text-gray-800 dark:text-white">₹{totalRevenue.toLocaleString()}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <FaChartLine className="text-green-500 text-xs" />
-                      <span className="text-xs text-gray-500">+12% this month</span>
+              <div onClick={() => navigate("salary")} className="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-orange-200/50 dark:border-orange-700/50 cursor-pointer">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative p-5">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+                      <FaMoneyBill className="text-2xl text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm">Pending Payments</p>
+                      <p className="text-2xl font-bold text-gray-800 dark:text-white">{pendingPayments.count}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <FaClock className="text-orange-500 text-xs" />
+                        <span className="text-xs text-gray-500">{formatCurrency(pendingPayments.totalAmount)} pending</span>
+                      </div>
                     </div>
                   </div>
+                  {/* Show pending items preview if available */}
+                  {/* {pendingPayments.items && pendingPayments.items.length > 0 && (
+                    <div className="space-y-1 mt-2 pt-2 border-t border-orange-100 dark:border-orange-900/30">
+                      {pendingPayments.items.slice(0, 3).map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-center text-xs">
+                          <span className="text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{item.name}</span>
+                          <span className="text-orange-600 dark:text-orange-400 font-medium">{formatCurrency(item.salary)}</span>
+                        </div>
+                      ))}
+                      {pendingPayments.items.length > 3 && (
+                        <p className="text-xs text-gray-400 text-center">+{pendingPayments.items.length - 3} more</p>
+                      )}
+                    </div>
+                  )} */}
                 </div>
               </div>
             </SlideUp>
@@ -375,10 +491,44 @@ const Home = () => {
             </div>
           </FadeIn>
 
-          {/* Additional Insights Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Performance Overview */}
-            <SlideUp delay={400}>
+          {/* Pending Payments Detail Section - From localStorage */}
+          {pendingPayments.items && pendingPayments.items.length > 0 && (
+            <div className="w-full mb-8">
+              <SlideUp delay={400}>
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                  <div className="relative px-6 pt-6 pb-3">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-orange-500 to-red-500 rounded-l-2xl"></div>
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                      <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center shadow-md">
+                        <FaClock className="text-white text-sm" />
+                      </div>
+                      Pending Payments Details
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                      {pendingPayments.count} payments pending totaling {formatCurrency(pendingPayments.totalAmount)}
+                    </p>
+                  </div>
+                  <div className="p-6 pt-2">
+                    <div className="space-y-2">
+                      {pendingPayments.items.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-800 dark:text-white">{item.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{item.module} • {item.batchName}</p>
+                          </div>
+                          <p className="font-bold text-orange-600 dark:text-orange-400">{formatCurrency(item.salary)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </SlideUp>
+            </div>
+          )}
+
+          {/* Performance Overview */}
+          <div className="w-full mb-8">
+            <SlideUp delay={500}>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                 <div className="relative px-6 pt-6 pb-3">
                   <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 rounded-l-2xl"></div>
@@ -414,95 +564,12 @@ const Home = () => {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Active Courses</p>
-                          <p className="text-xl font-bold text-gray-800 dark:text-white">{overview?.activeCourses || 12}</p>
+                          <p className="text-xl font-bold text-gray-800 dark:text-white">{overview?.activeCourses || stats.totalCourses || 12}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-green-600 dark:text-green-400">+2 this month</p>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-xl">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg flex items-center justify-center shadow-sm">
-                          <FaFire className="text-white" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Student Attendance</p>
-                          <p className="text-xl font-bold text-gray-800 dark:text-white">94%</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-green-600 dark:text-green-400">↑ 5%</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </SlideUp>
-
-            {/* System Health */}
-            <SlideUp delay={450}>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-                <div className="relative px-6 pt-6 pb-3">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 rounded-l-2xl"></div>
-                  <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md">
-                      <FaShieldAlt className="text-white text-sm" />
-                    </div>
-                    System Health
-                  </h2>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Platform status and metrics</p>
-                </div>
-                <div className="p-6 pt-2 space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-700/50 dark:to-gray-700/30 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center shadow-sm">
-                        <FaServer className="text-white" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Server Status</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">API Response Time</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm font-semibold text-green-600 dark:text-green-400">Online</span>
-                      </div>
-                      <p className="text-xs text-gray-500">128ms</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-700/50 dark:to-gray-700/30 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-sm">
-                        <FaDatabase className="text-white" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Database Health</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Storage Usage</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-semibold text-blue-600 dark:text-cyan-400">Excellent</span>
-                      <p className="text-xs text-gray-500">45% used</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-700/50 dark:to-gray-700/30 rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center shadow-sm">
-                        <FaGlobe className="text-white" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Sessions</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Current Users Online</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">{overview?.activeSessions || 24}</span>
-                      <p className="text-xs text-gray-500">active now</p>
                     </div>
                   </div>
                 </div>
@@ -511,8 +578,8 @@ const Home = () => {
           </div>
 
           {/* Recent Activity Feed */}
-          <FadeIn delay={500}>
-            <div className="mt-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+          <FadeIn delay={600}>
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
               <div className="relative px-6 pt-6 pb-3">
                 <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 rounded-l-2xl"></div>
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -526,15 +593,16 @@ const Home = () => {
               <div className="p-6 pt-2">
                 <div className="space-y-3">
                   {[
-                    { action: "New course added", detail: "Full Stack Development", time: "2 minutes ago", icon: FaBook, color: "blue" },
-                    { action: "Student enrolled", detail: "John Doe joined Batch A", time: "15 minutes ago", icon: FaUsers, color: "cyan" },
-                    { action: "Salary processed", detail: "December payroll completed", time: "1 hour ago", icon: FaMoneyBill, color: "green" },
-                    { action: "Batch created", detail: "Weekend Batch - January", time: "3 hours ago", icon: FaFolderPlus, color: "blue" },
+                    { action: `${stats.totalLecturers} Lecturers Active`, detail: "Faculty management updated", time: "Just now", icon: FaChalkboardTeacher, color: "blue" },
+                    { action: `${stats.activeBatches} Batches Running`, detail: "Active learning sessions", time: "Live", icon: FaFolderPlus, color: "cyan" },
+                    { action: `${pendingPayments.count} Pending Payments`, detail: formatCurrency(pendingPayments.totalAmount), time: "Needs attention", icon: FaMoneyBill, color: "orange" },
+                    { action: `${stats.totalCourses} Modules Available`, detail: "Course catalog ready", time: "Updated", icon: FaBook, color: "green" },
                   ].map((activity, idx) => {
                     const gradientMap = {
                       blue: "from-blue-500 to-cyan-500",
                       cyan: "from-cyan-500 to-teal-500",
                       green: "from-green-500 to-emerald-500",
+                      orange: "from-orange-500 to-red-500",
                     };
                     return (
                       <div key={idx} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/20 transition-colors">

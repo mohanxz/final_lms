@@ -147,7 +147,7 @@ const Sidebar = ({ children }) => {
           <div className={`border-b border-gray-200 dark:border-gray-700 h-20 flex items-center px-4`}>
             <div className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 w-full">
               <div className="relative">
-                <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm">
+                <div className="h-10 w-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white shadow-sm">
                   <FaUserCircle className="text-lg" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full" />
@@ -163,7 +163,7 @@ const Sidebar = ({ children }) => {
           <nav className="flex-1 px-3 py-6">
             <NavLink to="/admin/" end className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive ? "bg-blue-700 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
+                isActive ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`}>
               <FaHome className="text-lg" />
               <span className="inline md:inline">Dashboard</span>
@@ -180,7 +180,7 @@ const Sidebar = ({ children }) => {
                 }}
                 className={`flex items-center gap-4 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 ${
                   location.pathname === "/admin/batches" || location.pathname.startsWith("/admin/batch/")
-                    ? "bg-blue-700 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                     : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
                 }`}
               >
@@ -198,7 +198,7 @@ const Sidebar = ({ children }) => {
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
                           isActive
-                            ? "bg-blue-700 text-white shadow-md"
+                            ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-md"
                             : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
                         }`
                       }
@@ -219,7 +219,7 @@ const Sidebar = ({ children }) => {
 
             <NavLink to="/admin/students" className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive ? "bg-blue-700 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
+                isActive ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`}>
               <FaUsers className="text-lg" />
               <span className="inline md:inline">My Students</span>
@@ -228,7 +228,7 @@ const Sidebar = ({ children }) => {
 
             <NavLink to="/admin/superadmin-chat" className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive ? "bg-blue-700 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
+                isActive ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`}>
               <FaComments className="text-lg" />
               <span className="inline md:inline">Super Admin Chat</span>
@@ -236,7 +236,7 @@ const Sidebar = ({ children }) => {
             
             <NavLink to="/admin/settings" className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive ? "bg-blue-700 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
+                isActive ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`}>
               <FaCog className="text-lg" />
               <span className="inline md:inline">Profile</span>

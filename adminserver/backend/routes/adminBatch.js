@@ -4,7 +4,7 @@ const verifyAccessToken = require('../middleware/auth');
 const Batch = require('../models/Batch');
 const Course = require('../models/Course');
 
-router.get('/my-batches',verifyAccessToken, async (req, res) => {
+router.get('/my-batches', verifyAccessToken, async (req, res) => {
   try {
     const adminId = req.user.id;
 
@@ -19,7 +19,52 @@ router.get('/my-batches',verifyAccessToken, async (req, res) => {
   }
 });
 
-// Mark a module in a batch as completed by a specific admin
+// Mark a specific module in a batch as completed by admin
+router.patch('/mark-module-complete/:batchId', verifyAccessToken, async (req, res) => {
+  try {
+    const { batchId } = req.params;
+    const adminId = req.user.id;
+    const { module, isCompleted } = req.body;
+
+    // Step 1: Fetch the batch
+    const batch = await Batch.findById(batchId);
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found." });
+    }
+
+    console.log(`Marking module "${module}" in batch ${batchId} as completed by admin ${adminId}`);
+
+    // Step 2: Find the specific admin-module pair and update
+    let updated = false;
+    batch.admins = batch.admins.map((adminObj) => {
+      if (adminObj.admin.equals(adminId) && adminObj.module === module) {
+        adminObj.ifCompleted = isCompleted;
+        updated = true;
+        console.log(`Updated module "${module}" for admin ${adminId} to completed: ${isCompleted}`);
+      }
+      return adminObj;
+    });
+
+    if (!updated) {
+      console.log(`Module "${module}" not found for admin ${adminId} in batch ${batchId}`);
+      return res.status(404).json({ 
+        message: "Module not found or you're not assigned to this module." 
+      });
+    }
+
+    await batch.save();
+
+    res.json({
+      message: `Module "${module}" marked as ${isCompleted ? "completed" : "incomplete"}`,
+      batch,
+    });
+  } catch (err) {
+    console.error("Error updating module completion status:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Mark all modules in a batch as completed by admin
 router.patch('/mark-complete/:batchId', verifyAccessToken, async (req, res) => {
   try {
     const { batchId } = req.params;
@@ -33,6 +78,7 @@ router.patch('/mark-complete/:batchId', verifyAccessToken, async (req, res) => {
     }
 
     console.log(`Marking batch ${batchId} as completed by admin ${adminId}`);
+    
     // Step 2: Update all modules where this admin is assigned
     let updated = false;
     batch.admins = batch.admins.map((adminObj) => {
@@ -62,9 +108,10 @@ router.patch('/mark-complete/:batchId', verifyAccessToken, async (req, res) => {
   }
 });
 
+// Check completion status for all modules in a batch
 router.get('/check-complete/:batchId', verifyAccessToken, async (req, res) => {
   const { batchId } = req.params;
-  const adminId = req.user.id; // Assuming verifyAccessToken attaches user object to req
+  const adminId = req.user.id;
 
   try {
     const batch = await Batch.findById(batchId);
@@ -76,11 +123,19 @@ router.get('/check-complete/:batchId', verifyAccessToken, async (req, res) => {
       return res.status(404).json({ message: 'Admin not assigned to this batch.' });
     }
 
+    // Check if all modules are completed
     const allCompleted = adminModules.every(mod => mod.ifCompleted === true);
+
+    // Create a map of module completion status
+    const moduleCompletions = {};
+    adminModules.forEach(mod => {
+      moduleCompletions[mod.module] = mod.ifCompleted === true;
+    });
 
     res.status(200).json({
       message: allCompleted ? 'All modules completed by admin.' : 'Some modules still incomplete.',
-      isCompleted: allCompleted
+      isCompleted: allCompleted,
+      moduleCompletions: moduleCompletions
     });
 
   } catch (err) {
@@ -89,9 +144,7 @@ router.get('/check-complete/:batchId', verifyAccessToken, async (req, res) => {
   }
 });
 
-
-
-router.get('/:batchId',verifyAccessToken, async (req, res) => {
+router.get('/:batchId', verifyAccessToken, async (req, res) => {
   try {
     const { batchId } = req.params;
 

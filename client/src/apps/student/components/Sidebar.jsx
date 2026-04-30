@@ -97,7 +97,7 @@ const Sidebar = ({ children, pageTitle }) => {
         <div className="border-b border-gray-200 dark:border-gray-700 h-20 flex items-center px-4 relative">
           <div className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 w-full">
             <div className="relative">
-              <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-sm">
+              <div className="h-10 w-10 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white shadow-sm">
                 <FaUserCircle className="text-lg" />
               </div>
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full"></div>
@@ -128,7 +128,7 @@ const Sidebar = ({ children, pageTitle }) => {
             className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                 isActive
-                  ? "bg-blue-700 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                   : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`
             }
@@ -146,7 +146,7 @@ const Sidebar = ({ children, pageTitle }) => {
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                     isActive
-                      ? "bg-blue-700 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                       : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
                   }`
                 }
@@ -164,7 +164,7 @@ const Sidebar = ({ children, pageTitle }) => {
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                     isActive
-                      ? "bg-blue-700 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                       : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
                   }`
                 }
@@ -183,7 +183,7 @@ const Sidebar = ({ children, pageTitle }) => {
             className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                 isActive
-                  ? "bg-blue-700 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                   : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`
             }
@@ -199,7 +199,7 @@ const Sidebar = ({ children, pageTitle }) => {
             className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                 isActive
-                  ? "bg-blue-700 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                   : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`
             }
@@ -216,7 +216,7 @@ const Sidebar = ({ children, pageTitle }) => {
               className={({ isActive }) =>
                 `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                   isActive
-                    ? "bg-blue-700 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                     : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
                 }`
               }
@@ -232,7 +232,7 @@ const Sidebar = ({ children, pageTitle }) => {
                 className={({ isActive }) =>
                   `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                     isActive
-                      ? "bg-blue-700 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                       : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
                   }`
                 }
@@ -247,7 +247,7 @@ const Sidebar = ({ children, pageTitle }) => {
             className={({ isActive }) =>
               `flex items-center gap-4 px-4 py-3 my-1 rounded-xl transition-all duration-200 ease-in-out ${
                 isActive
-                  ? "bg-blue-700 text-white shadow-lg"
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
                   : "hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white"
               }`
             }

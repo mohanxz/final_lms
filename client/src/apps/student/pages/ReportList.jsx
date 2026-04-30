@@ -7,40 +7,200 @@ import {
   FaEye, FaTrophy, FaMedal, FaStar, FaAward, FaPercentage,
   FaArrowRight, FaBrain, FaClock, FaUserGraduate, FaChevronRight,
   FaLightbulb, FaList, FaLayerGroup, FaGraduationCap, FaExpand,
-  FaCompress
+  FaCompress, FaSpinner, FaExclamationTriangle, FaRedo
 } from "react-icons/fa";
 import { MdOutlineQuiz, MdOutlineSpeed, MdOutlineDateRange } from "react-icons/md";
 import { FadeIn, SlideUp } from "../../../shared/LoadingComponents";
 
+// ============================================
+// SKELETON LOADER
+// ============================================
 const ReportListSkeleton = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
-    <div className="max-w-screen mx-auto">
-      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden">
-        <div className="p-6">
-          <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded-lg w-48 mb-6 animate-pulse"></div>
-          <div className="flex flex-wrap gap-4 mb-6">
-            <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded-xl w-48 animate-pulse"></div>
-            <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded-xl w-48 animate-pulse"></div>
-          </div>
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl animate-pulse">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-32 mb-2"></div>
-                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-24"></div>
-                  </div>
-                  <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded-lg w-24"></div>
-                </div>
-              </div>
-            ))}
-          </div>
+  <div className="min-h-screen bg-slate-50 dark:bg-gray-900 p-6">
+    <div className="max-w-7xl mx-auto">
+      {/* Header Skeleton */}
+      <div className="mb-8">
+        <div className="h-40 bg-white dark:bg-gray-800 rounded-2xl animate-pulse shadow-sm border border-gray-200 dark:border-gray-700"></div>
+      </div>
+      {/* Filter Skeleton */}
+      <div className="mb-8">
+        <div className="h-32 bg-white dark:bg-gray-800 rounded-2xl animate-pulse shadow-sm border border-gray-200 dark:border-gray-700"></div>
+      </div>
+      {/* List Skeleton */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-28 bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+          ))}
         </div>
       </div>
     </div>
   </div>
 );
 
+// ============================================
+// ERROR STATE
+// ============================================
+const ErrorState = ({ message, onRetry }) => (
+  <div className="min-h-screen bg-slate-50 dark:bg-gray-900 p-6">
+    <div className="max-w-7xl mx-auto">
+      <FadeIn>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center max-w-md mx-auto">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+            <FaExclamationTriangle className="text-2xl text-amber-500 dark:text-amber-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Unable to Load Reports
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{message}</p>
+          <button 
+            onClick={onRetry}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-all duration-200 shadow-sm"
+          >
+            <FaRedo size={14} />
+            Try Again
+          </button>
+        </div>
+      </FadeIn>
+    </div>
+  </div>
+);
+
+// ============================================
+// EMPTY STATE
+// ============================================
+const EmptyState = () => (
+  <div className="text-center py-16">
+    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+      <MdOutlineQuiz className="text-3xl text-gray-400 dark:text-gray-500" />
+    </div>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+      No Quiz Reports Found
+    </h3>
+    <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+      Complete some quizzes to see your performance reports here.
+    </p>
+  </div>
+);
+
+// ============================================
+// CONSTANTS
+// ============================================
+const SCORE_GRADES = [
+  { min: 90, grade: 'A+', icon: FaAward, label: 'Outstanding', color: 'emerald' },
+  { min: 80, grade: 'A', icon: FaStar, label: 'Excellent', color: 'green' },
+  { min: 70, grade: 'B', icon: FaMedal, label: 'Very Good', color: 'blue' },
+  { min: 60, grade: 'C', icon: FaChartLine, label: 'Good Progress', color: 'amber' },
+  { min: 50, grade: 'D', icon: FaLightbulb, label: 'Developing', color: 'orange' },
+  { min: 0, grade: 'F', icon: FaBrain, label: 'Keep Learning', color: 'red' },
+];
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+const getScoreGrade = (score, total) => {
+  const percentage = total > 0 ? (score / total) * 100 : 0;
+  return SCORE_GRADES.find(g => percentage >= g.min) || SCORE_GRADES[SCORE_GRADES.length - 1];
+};
+
+const getProgressBarColor = (percentage) => {
+  if (percentage >= 80) return {
+    bg: 'bg-emerald-500 dark:bg-emerald-400',
+    light: 'bg-emerald-100 dark:bg-emerald-900/30',
+    text: 'text-emerald-700 dark:text-emerald-300',
+    bar: '#10b981'
+  };
+  if (percentage >= 60) return {
+    bg: 'bg-amber-500 dark:bg-amber-400',
+    light: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-700 dark:text-amber-300',
+    bar: '#f59e0b'
+  };
+  return {
+    bg: 'bg-red-500 dark:bg-red-400',
+    light: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-700 dark:text-red-300',
+    bar: '#ef4444'
+  };
+};
+
+// ============================================
+// STAT CARD COMPONENT
+// ============================================
+const StatCard = ({ icon: Icon, label, value, subtext, color }) => {
+  const colorClasses = {
+    emerald: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400",
+    blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
+    amber: "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400",
+    purple: "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colorClasses[color] || colorClasses.blue}`}>
+          <Icon size={18} />
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{label}</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">{value}</p>
+          {subtext && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtext}</p>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// OPTION BADGE COMPONENT
+// ============================================
+const OptionBadge = ({ opt, text, isSelected, isCorrect }) => {
+  // Determine colors based on state
+  let containerClasses = '';
+  let badgeClasses = '';
+  let textClasses = '';
+  let icon = null;
+
+  if (isSelected && isCorrect) {
+    // User selected the correct answer
+    containerClasses = 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800';
+    badgeClasses = 'bg-emerald-500 text-white';
+    textClasses = 'text-emerald-700 dark:text-emerald-300 font-medium';
+    icon = <FaCheckCircle className="text-emerald-500 dark:text-emerald-400 flex-shrink-0" size={14} />;
+  } else if (isSelected && !isCorrect) {
+    // User selected wrong answer
+    containerClasses = 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
+    badgeClasses = 'bg-red-500 text-white';
+    textClasses = 'text-red-700 dark:text-red-300';
+    icon = <FaTimesCircle className="text-red-500 dark:text-red-400 flex-shrink-0" size={14} />;
+  } else if (!isSelected && isCorrect) {
+    // Correct answer user didn't select
+    containerClasses = 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/50';
+    badgeClasses = 'bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-300';
+    textClasses = 'text-emerald-600 dark:text-emerald-400';
+  } else {
+    // Neutral option
+    containerClasses = 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700';
+    badgeClasses = 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400';
+    textClasses = 'text-gray-600 dark:text-gray-400';
+  }
+
+  return (
+    <div className={`p-3 rounded-lg border ${containerClasses} transition-all duration-200`}>
+      <div className="flex items-center gap-3">
+        <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold flex-shrink-0 ${badgeClasses}`}>
+          {opt}
+        </div>
+        <span className={`flex-1 text-sm ${textClasses}`}>{text}</span>
+        {icon}
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
 const ReportList = () => {
   const [reports, setReports] = useState([]);
   const [filteredReports, setFilteredReports] = useState([]);
@@ -53,36 +213,37 @@ const ReportList = () => {
   const [quizDetail, setQuizDetail] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const token = localStorage.getItem("token");
-
-        const profileRes = await axios.get(`${import.meta.env.VITE_LOGIN_API}/auth/student/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const studentId = profileRes.data._id;
-
-        const res = await API.get(
-          `/api/quizreports/quiz-attempts?studentId=${studentId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        setReports(res.data);
-        setFilteredReports(res.data);
-      } catch (err) {
-        console.error("Failed to fetch reports:", err);
-        setError("Failed to load quiz reports. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchReports();
   }, []);
+
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = localStorage.getItem("token");
+
+      const profileRes = await axios.get(`${import.meta.env.VITE_LOGIN_API}/auth/student/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const studentId = profileRes.data._id;
+
+      const res = await API.get(
+        `/api/quizreports/quiz-attempts?studentId=${studentId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setReports(res.data);
+      setFilteredReports(res.data);
+    } catch (err) {
+      console.error("Failed to fetch reports:", err);
+      setError("We encountered an issue while loading your quiz reports. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let filtered = [...reports];
@@ -100,6 +261,7 @@ const ReportList = () => {
 
   const openModal = async (noteId) => {
     try {
+      setDetailLoading(true);
       const token = localStorage.getItem("token");
       const res = await API.get(
         `/api/quizreports/quiz-detail/${noteId}`,
@@ -111,6 +273,8 @@ const ReportList = () => {
       setIsFullscreen(false);
     } catch (err) {
       console.error("Failed to fetch quiz details:", err);
+    } finally {
+      setDetailLoading(false);
     }
   };
 
@@ -125,116 +289,70 @@ const ReportList = () => {
     setIsFullscreen(!isFullscreen);
   };
 
-  const getScoreColor = (score, total) => {
-    const percentage = (score / total) * 100;
-    if (percentage >= 80) return { bg: '#22c55e', light: '#dcfce7', text: '#166534' };
-    if (percentage >= 60) return { bg: '#f59e0b', light: '#fed7aa', text: '#9a3412' };
-    return { bg: '#ef4444', light: '#fee2e2', text: '#991b1b' };
-  };
-
-  const getScoreGrade = (score, total) => {
-    const percentage = (score / total) * 100;
-    if (percentage >= 90) return { grade: 'A+', icon: FaAward, label: 'Excellent' };
-    if (percentage >= 80) return { grade: 'A', icon: FaStar, label: 'Very Good' };
-    if (percentage >= 70) return { grade: 'B', icon: FaStar, label: 'Good' };
-    if (percentage >= 60) return { grade: 'C', icon: FaMedal, label: 'Satisfactory' };
-    if (percentage >= 50) return { grade: 'D', icon: FaChartLine, label: 'Needs Improvement' };
-    return { grade: 'F', icon: FaTimesCircle, label: 'Poor' };
-  };
-
   const getOverallStats = () => {
     if (reports.length === 0) return null;
     const totalScore = reports.reduce((acc, r) => acc + (r.score || 0), 0);
     const totalPossible = reports.reduce((acc, r) => acc + (r.total || 1), 0);
-    const overallPercentage = (totalScore / totalPossible) * 100;
-    const bestScore = Math.max(...reports.map(r => (r.score / r.total) * 100));
-    const averageScore = overallPercentage;
+    const overallPercentage = totalPossible > 0 ? (totalScore / totalPossible) * 100 : 0;
+    const bestScore = Math.max(...reports.map(r => r.total > 0 ? (r.score / r.total) * 100 : 0));
     
-    return { overallPercentage, bestScore, averageScore, totalQuizzes: reports.length };
-  };
-
-  // Calculate correct and wrong answers for the current quiz
-  const getQuizStats = () => {
-    if (!quizDetail) return { correct: 0, wrong: 0, total: 0 };
-    const correct = quizDetail.score;
-    const total = quizDetail.total;
-    const wrong = total - correct;
-    return { correct, wrong, total };
+    return { 
+      overallPercentage, 
+      bestScore, 
+      totalQuizzes: reports.length 
+    };
   };
 
   if (loading) return <ReportListSkeleton />;
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
-        <div className="max-w-screen mx-auto">
-          <FadeIn>
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-8 text-center max-w-md mx-auto border border-gray-200/50 dark:border-gray-700/50">
-              <div className="text-red-500 dark:text-red-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">Error Loading Reports</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
-              <button 
-                onClick={() => window.location.reload()}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg"
-              >
-                Try Again
-              </button>
-            </div>
-          </FadeIn>
-        </div>
-      </div>
-    );
-  }
+  if (error) return <ErrorState message={error} onRetry={fetchReports} />;
 
   const uniqueModules = ["All", ...new Set(reports.map((r) => r.module))];
   const uniqueDays = ["All", ...new Set(reports.map((r) => r.day))];
   const overallStats = getOverallStats();
-  const quizStats = getQuizStats();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Animated Background Pattern */}
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
+      {/* Subtle Background Pattern */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-400/5 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative z-10 p-6 lg:p-8">
-        <div className="max-w-screen mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <FadeIn delay={100}>
-            <div className="relative mb-8 overflow-hidden rounded-3xl shadow-2xl bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600">
-              <div className="absolute inset-0 bg-black/20"></div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
-              
-              <div className="relative p-8 lg:p-10">
+            <div className="mb-8">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 lg:p-8">
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-                  <div className="flex-1">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full mb-4">
-                      <MdOutlineQuiz className="text-yellow-300" />
-                      <span className="text-white text-sm font-medium">Quiz Performance Dashboard</span>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                        <MdOutlineQuiz className="text-xs" />
+                        Performance Dashboard
+                      </span>
                     </div>
-                    <h1 className="text-3xl lg:text-4xl font-bold text-white mb-3 drop-shadow-sm">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-1">
                       Quiz Reports
                     </h1>
-                    <p className="text-blue-100 text-base lg:text-lg max-w-2xl">
-                      Track your quiz performance, review answers, and monitor your progress across all modules.
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Track your progress and review past quiz attempts
                     </p>
                   </div>
                   
                   {overallStats && (
-                    <div className="bg-white/15 backdrop-blur-md rounded-2xl p-5 text-center min-w-[180px] border border-white/20 shadow-lg group hover:bg-white/20 transition-all duration-300">
-                      <div className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                        <FaTrophy className="text-2xl text-white" />
+                    <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl px-5 py-4 border border-blue-100 dark:border-blue-800/30">
+                      <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-sm">
+                        <FaTrophy className="text-white text-xl" />
                       </div>
-                      <p className="text-2xl font-bold text-white">{overallStats.overallPercentage.toFixed(1)}%</p>
-                      <p className="text-blue-100 text-sm">Overall Average</p>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {overallStats.overallPercentage.toFixed(1)}%
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Overall Average • {overallStats.totalQuizzes} Quiz{overallStats.totalQuizzes !== 1 ? 'zes' : ''}
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -243,45 +361,39 @@ const ReportList = () => {
           </FadeIn>
 
           {/* Filter Section */}
-          <SlideUp delay={350}>
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden mb-8">
-              <div className="relative px-6 pt-6 pb-3">
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-500 to-cyan-500 rounded-l-2xl"></div>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                    <FaFilter className="text-white text-xs" />
-                  </div>
-                  Filter Reports
-                </h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Filter by module or day to find specific reports</p>
-              </div>
-              <div className="p-6 pt-2">
-                <div className="flex flex-wrap gap-4">
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      <FaBookOpen className="inline mr-2 text-blue-500 dark:text-cyan-400" /> Module
+          <SlideUp delay={250}>
+            <div className="mb-8">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <FaFilter className="text-blue-500" size={14} />
+                  <h2 className="font-semibold text-gray-900 dark:text-white text-sm">Filter Reports</h2>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex-1 min-w-[180px]">
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+                      Module
                     </label>
                     <select
                       value={selectedModule}
                       onChange={(e) => setSelectedModule(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
                     >
                       {uniqueModules.map((mod, idx) => (
                         <option key={idx} value={mod}>
-                          {mod === "All" ? "All Modules" : `Module: ${mod}`}
+                          {mod === "All" ? "All Modules" : mod}
                         </option>
                       ))}
                     </select>
                   </div>
 
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      <MdOutlineDateRange className="inline mr-2 text-blue-500 dark:text-cyan-400" /> Day
+                  <div className="flex-1 min-w-[180px]">
+                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+                      Day
                     </label>
                     <select
                       value={selectedDay}
                       onChange={(e) => setSelectedDay(e.target.value)}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
                     >
                       {uniqueDays.map((d, idx) => (
                         <option key={idx} value={d}>
@@ -296,86 +408,71 @@ const ReportList = () => {
           </SlideUp>
 
           {/* Reports List */}
-          <SlideUp delay={400}>
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-              <div className="relative px-6 pt-6 pb-3">
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-500 to-emerald-600 rounded-l-2xl"></div>
-                <h2 className="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                  <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                    <FaClipboardList className="text-white text-xs" />
-                  </div>
+          <SlideUp delay={350}>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <FaClipboardList className="text-blue-500" size={16} />
                   Quiz Attempts
+                  <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                    ({filteredReports.length})
+                  </span>
                 </h2>
-                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                  {filteredReports.length} quiz{filteredReports.length !== 1 ? 'zes' : ''} found
-                </p>
               </div>
-              <div className="p-6 pt-2">
+              
+              <div className="p-5">
                 {filteredReports.length === 0 ? (
-                  <div className="text-center py-12">
-                    <MdOutlineQuiz className="text-5xl mx-auto mb-3 text-gray-400" />
-                    <p className="text-gray-500 dark:text-gray-400">No quiz reports found matching your filters.</p>
-                  </div>
+                  <EmptyState />
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {filteredReports.map((report, index) => {
-                      const scorePercentage = Math.min(((report.score || 0) / (report.total || 1)) * 100, 100);
-                      const scoreColor = getScoreColor(report.score || 0, report.total || 1);
+                      const scorePercentage = Math.min(
+                        ((report.score || 0) / (report.total || 1)) * 100, 
+                        100
+                      );
                       const gradeInfo = getScoreGrade(report.score || 0, report.total || 1);
                       const GradeIcon = gradeInfo.icon;
+                      const progressColor = getProgressBarColor(scorePercentage);
                       
                       return (
                         <div
                           key={index}
-                          className="group relative overflow-hidden border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 bg-white dark:bg-gray-800/50"
+                          className="group border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800/50"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="relative p-5">
+                          <div className="p-4">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                              <div className="flex-1">
+                              <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
-                                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-                                    <MdOutlineQuiz className="text-white text-xl" />
+                                  <div className={`w-10 h-10 rounded-xl ${progressColor.light} flex items-center justify-center flex-shrink-0`}>
+                                    <GradeIcon className={`text-lg ${progressColor.text}`} />
                                   </div>
-                                  <div>
-                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">
-                                      Module: {report.module}
+                                  <div className="min-w-0">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                                      {report.module}
                                     </h3>
-                                    <div className="flex flex-wrap items-center gap-3 mt-1">
-                                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                                        <MdOutlineDateRange className="text-gray-400 text-xs" />
-                                        <span>Day {report.day}</span>
-                                      </div>
-                                      <div className={`flex items-center gap-1 text-sm px-2 py-0.5 rounded-full`} style={{ backgroundColor: scoreColor.light, color: scoreColor.text }}>
-                                        <GradeIcon className="text-xs" />
-                                        <span className="font-medium">{gradeInfo.grade} - {gradeInfo.label}</span>
-                                      </div>
+                                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                      <span>Day {report.day}</span>
+                                      <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${progressColor.light} ${progressColor.text}`}>
+                                        {gradeInfo.grade} • {gradeInfo.label}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
                                 
-                                {/* Score Display */}
-                                <div className="mt-4">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <FaChartLine style={{ color: scoreColor.bg }} />
-                                      <span className="font-semibold" style={{ color: scoreColor.text }}>
-                                        Score: {report.score} / {report.total}
-                                      </span>
-                                      <span className="text-sm text-gray-500">
-                                        ({scorePercentage.toFixed(1)}%)
-                                      </span>
-                                    </div>
-                                    <span className="text-xs text-gray-400">Accuracy Rate</span>
+                                {/* Progress Bar */}
+                                <div className="mt-3">
+                                  <div className="flex items-center justify-between mb-1.5">
+                                    <span className={`text-sm font-semibold ${progressColor.text}`}>
+                                      {report.score} / {report.total}
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                      {scorePercentage.toFixed(0)}%
+                                    </span>
                                   </div>
-                                  <div className="relative h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                                     <div 
-                                      className="absolute left-0 top-0 h-full rounded-full transition-all duration-1000 ease-out"
-                                      style={{ 
-                                        width: `${scorePercentage}%`, 
-                                        backgroundColor: scoreColor.bg,
-                                        boxShadow: `0 0 8px ${scoreColor.bg}`
-                                      }}
+                                      className={`h-full rounded-full transition-all duration-700 ease-out ${progressColor.bg}`}
+                                      style={{ width: `${scorePercentage}%` }}
                                     />
                                   </div>
                                 </div>
@@ -383,13 +480,11 @@ const ReportList = () => {
                               
                               <button
                                 onClick={() => openModal(report.noteId)}
-                                className="group/btn relative px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium flex items-center gap-2 hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 transform hover:scale-105 shadow-md overflow-hidden"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] flex-shrink-0"
                               >
-                                <span className="relative z-10 flex items-center gap-2">
-                                  <FaEye className="text-sm" />
-                                  Review Quiz
-                                  <FaChevronRight className="text-sm group-hover/btn:translate-x-1 transition-transform" />
-                                </span>
+                                <FaEye size={12} />
+                                Review
+                                <FaChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
                               </button>
                             </div>
                           </div>
@@ -404,87 +499,103 @@ const ReportList = () => {
         </div>
       </div>
 
-      {/* Full-Screen Modal */}
-      {modalOpen && quizDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl overflow-hidden">
-          <div className={`bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 w-full h-full flex flex-col transition-all duration-300 ${isFullscreen ? 'p-0' : 'p-4'}`}>
-            {/* Sticky Header */}
-            <div className="relative bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 shadow-2xl flex-shrink-0">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48"></div>
-              <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full -ml-40 -mb-40"></div>
-              
-              <div className="relative px-6 py-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
-                      <MdOutlineQuiz className="text-white text-2xl" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-white tracking-tight">Quiz Review</h3>
-                      <p className="text-blue-100 text-sm mt-0.5">Comprehensive answer analysis</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={toggleFullscreen}
-                      className="text-white/80 hover:text-white bg-white/20 hover:bg-white/30 rounded-full p-2 transition-all duration-200 transform hover:scale-110"
-                      title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-                    >
-                      {isFullscreen ? <FaCompress className="text-xl" /> : <FaExpand className="text-xl" />}
-                    </button>
-                    <button
-                      onClick={closeModal}
-                      className="text-white/80 hover:text-white bg-white/20 hover:bg-white/30 rounded-full p-2 transition-all duration-200 transform hover:scale-110"
-                    >
-                      <FaTimes className="text-xl" />
-                    </button>
-                  </div>
+      {/* Quiz Detail Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-gray-900/80 dark:bg-black/90 backdrop-blur-sm"
+            onClick={closeModal}
+          />
+
+          {/* Modal Content */}
+          <div className={`relative bg-white dark:bg-gray-800 flex flex-col shadow-2xl animate-scaleIn ${
+            isFullscreen ? 'w-full h-full rounded-none' : 'w-full max-w-5xl max-h-[90vh] rounded-2xl mx-4'
+          }`}>
+            {/* Header */}
+            <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                  <MdOutlineQuiz className="text-blue-600 dark:text-blue-400 text-xl" />
                 </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Quiz Review</h3>
+                  {quizDetail && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {quizDetail.detail?.length || 0} Question{quizDetail.detail?.length !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={toggleFullscreen}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                  title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                >
+                  {isFullscreen ? <FaCompress size={16} /> : <FaExpand size={16} />}
+                </button>
+                <button
+                  onClick={closeModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                >
+                  <FaTimes size={18} />
+                </button>
               </div>
             </div>
 
-            {/* Scrollable Questions Area */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="max-w-7xl mx-auto w-full">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                      <FaBrain className="text-purple-400 text-xl" />
-                    </div>
-                    <h4 className="text-xl font-bold text-white">Question Review</h4>
-                  </div>
-                  <div className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 text-sm font-medium">
-                    {quizDetail.detail.length} Questions
-                  </div>
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto p-5">
+              {detailLoading ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <FaSpinner className="animate-spin text-blue-500 text-3xl mb-3" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Loading quiz details...</p>
                 </div>
-                
-                <div className="space-y-4">
+              ) : quizDetail && quizDetail.detail ? (
+                <div className="space-y-4 max-w-4xl mx-auto">
                   {quizDetail.detail.map((item, idx) => {
                     const { question, options, selected, correct } = item;
                     const isCorrect = selected === correct;
                     
                     return (
-                      <div key={idx} className={`rounded-xl overflow-hidden transition-all duration-300 ${isCorrect ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500'} bg-gray-800/30`}>
+                      <div
+                        key={idx}
+                        className={`rounded-xl overflow-hidden border ${
+                          isCorrect 
+                            ? 'border-emerald-200 dark:border-emerald-800' 
+                            : 'border-red-200 dark:border-red-800'
+                        }`}
+                      >
                         {/* Question Header */}
-                        <div className={`p-4 ${isCorrect ? 'bg-green-500/5' : 'bg-red-500/5'}`}>
+                        <div className={`px-4 py-3 ${
+                          isCorrect 
+                            ? 'bg-emerald-50/50 dark:bg-emerald-900/10' 
+                            : 'bg-red-50/50 dark:bg-red-900/10'
+                        }`}>
                           <div className="flex items-start gap-3">
-                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm ${
-                              isCorrect ? 'bg-green-500' : 'bg-red-500'
-                            } text-white`}>
+                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold flex-shrink-0 ${
+                              isCorrect 
+                                ? 'bg-emerald-500 text-white' 
+                                : 'bg-red-500 text-white'
+                            }`}>
                               {idx + 1}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2 mb-1">
                                 <span className="text-xs text-gray-500">Question {idx + 1}</span>
-                                <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                                   isCorrect 
-                                    ? 'bg-green-500/20 text-green-400' 
-                                    : 'bg-red-500/20 text-red-400'
+                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' 
+                                    : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
                                 }`}>
-                                  {isCorrect ? 'Correct' : 'Incorrect'}
+                                  {isCorrect ? (
+                                    <><FaCheckCircle size={10} /> Correct</>
+                                  ) : (
+                                    <><FaTimesCircle size={10} /> Incorrect</>
+                                  )}
                                 </span>
                               </div>
-                              <p className="text-base text-white leading-relaxed">
+                              <p className="text-gray-900 dark:text-white font-medium leading-relaxed">
                                 {question}
                               </p>
                             </div>
@@ -492,80 +603,54 @@ const ReportList = () => {
                         </div>
                         
                         {/* Options */}
-                        <div className="p-4 space-y-2">
-                          {["A", "B", "C", "D"].map((opt) => {
-                            const isSelected = selected === opt;
-                            const isCorrectOpt = correct === opt;
-                            
-                            let bgColor = 'bg-gray-900/30';
-                            let borderColor = 'border-gray-700';
-                            let textColor = 'text-gray-300';
-                            
-                            if (isSelected && isCorrectOpt) {
-                              bgColor = 'bg-green-500/20';
-                              borderColor = 'border-green-500';
-                              textColor = 'text-green-400';
-                            } else if (isSelected && !isCorrectOpt) {
-                              bgColor = 'bg-red-500/20';
-                              borderColor = 'border-red-500';
-                              textColor = 'text-red-400';
-                            } else if (isCorrectOpt) {
-                              bgColor = 'bg-green-500/10';
-                              borderColor = 'border-green-500/30';
-                              textColor = 'text-green-300';
-                            }
-                            
-                            return (
-                              <div
-                                key={opt}
-                                className={`p-3 rounded-lg border ${borderColor} ${bgColor}`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-6 h-6 rounded flex items-center justify-center font-bold text-xs ${
-                                    isCorrectOpt ? 'bg-green-500 text-white' : 
-                                    isSelected ? 'bg-red-500 text-white' : 
-                                    'bg-gray-700 text-gray-400'
-                                  }`}>
-                                    {opt}
-                                  </div>
-                                  <span className={`flex-1 text-sm ${textColor}`}>{options[opt]}</span>
-                                  {isSelected && (
-                                    <span>
-                                      {isCorrectOpt ? (
-                                        <FaCheckCircle className="text-green-500" />
-                                      ) : (
-                                        <FaTimesCircle className="text-red-500" />
-                                      )}
-                                    </span>
-                                  )}
-                                  {!isSelected && isCorrectOpt && (
-                                    <span className="text-xs text-green-400">✓ Correct</span>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
+                        <div className="p-4 bg-white dark:bg-gray-800/50 space-y-2">
+                          {["A", "B", "C", "D"].map((opt) => (
+                            <OptionBadge
+                              key={opt}
+                              opt={opt}
+                              text={options[opt]}
+                              isSelected={selected === opt}
+                              isCorrect={correct === opt}
+                            />
+                          ))}
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              </div>
+              ) : null}
             </div>
 
             {/* Footer */}
-            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-700 bg-gray-900/50 flex justify-end">
+            <div className="flex-shrink-0 px-5 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
               <button
                 onClick={closeModal}
-                className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-lg flex items-center gap-2"
+                className="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium transition-all duration-200"
               >
-                <FaTimes />
                 Close Review
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Animation Styles */}
+      <style>{`
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        .animate-scaleIn {
+          animation: scaleIn 0.2s ease-out;
+        }
+      `}</style>
     </div>
   );
 };
