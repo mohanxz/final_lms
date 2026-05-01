@@ -20,21 +20,29 @@ const certificateRoutes = require("./routes/certificateroute.js");
 
 const app = express();
 
-/* ---------------------- */
-/* CORS CONFIG */
-/* ---------------------- */
+// 1. MANUAL CORS MIDDLEWARE (Must be at the very top)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  // Reflect origin back to client for maximum compatibility
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
-// origin: true automatically allows the origin of the request for maximum compatibility
-app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
-
-// Explicitly handle preflight requests
-app.options('*', cors());
-
+// 2. Health check route
+app.get('/health', (req, res) => res.send('Superadmin Server is Live! 🚀'));
 
 app.use(express.json());
 
