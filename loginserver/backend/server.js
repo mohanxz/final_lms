@@ -6,9 +6,24 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-// origin: true automatically allows the origin of the request
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://cybernaut-lms-v2.onrender.com',
+  'http://51.20.34.255:3000',
+  'http://51.20.34.255:5173',
+  'https://cybernaut-indol.vercel.app',
+];
+
 app.use(cors({
-  origin: true, 
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
