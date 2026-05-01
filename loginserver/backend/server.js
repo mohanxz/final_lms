@@ -6,24 +6,13 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://cybernaut-indol.vercel.app"
-];
-
+// origin: true automatically allows the origin of the request
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
+  origin: true, 
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-app.options("*", cors()); // 🔥 important
 
 app.use(express.json());
 
@@ -35,3 +24,5 @@ app.use('/auth', authRoutes);
 
 const PORT = process.env.PORT || 5004;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = app;
