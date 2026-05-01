@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 
-
 const app = express();
 
 const allowedOrigins = [
@@ -13,6 +12,7 @@ const allowedOrigins = [
   'https://cybernaut-lms-v2.onrender.com',
   'http://51.20.34.255:3000',
   'http://51.20.34.255:5173',
+  'https://cybernaut-indol.vercel.app',
 ];
 
 app.use(cors({
