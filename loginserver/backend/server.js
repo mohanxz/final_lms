@@ -6,32 +6,9 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://cybernaut-lms-v2.onrender.com',
-  'http://51.20.34.255:3000',
-  'http://51.20.34.255:5173',
-  'https://cybernaut-indol.vercel.app',
-  'https://loginserver-gold.vercel.app'
-];
-
+// Temporarily allowing all origins to fix the CORS block
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    
-    // Normalize origin by removing trailing slash for comparison
-    const normalizedOrigin = origin.replace(/\/$/, "");
-    const isAllowed = allowedOrigins.some(o => o.replace(/\/$/, "") === normalizedOrigin);
-
-    if (isAllowed) {
-      return callback(null, true);
-    } else {
-      console.log("CORS blocked for origin:", origin);
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true, 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
