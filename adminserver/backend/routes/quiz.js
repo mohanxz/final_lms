@@ -8,8 +8,8 @@ const XLSX = require("xlsx");
 const path = require("path");
 const fs = require("fs");
 
-// File upload config
-const upload = multer({ dest: "uploads/" });
+// File upload config - Using memoryStorage for Vercel compatibility
+const upload = multer({ storage: multer.memoryStorage() });
 
 /* ===================================================== */
 /* DOWNLOAD EXCEL TEMPLATE */
@@ -171,14 +171,12 @@ router.post(
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      // Read Excel
-      const workbook = XLSX.readFile(req.file.path);
+      // Read Excel from buffer instead of disk
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
       const sheetName = workbook.SheetNames[0];
       const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
       if (!sheetData.length) {
-        // Clean up uploaded file
-        fs.unlinkSync(req.file.path);
         return res.status(400).json({ error: "Excel file is empty" });
       }
 
@@ -219,9 +217,6 @@ router.post(
         });
       });
 
-      // Clean up uploaded file
-      fs.unlinkSync(req.file.path);
-
       if (validQuestions.length === 0) {
         return res.status(400).json({
           error: "No valid questions found",
@@ -241,14 +236,6 @@ router.post(
       });
     } catch (err) {
       console.error("Bulk upload error:", err);
-      // Clean up uploaded file if it exists
-      if (req.file && req.file.path) {
-        try {
-          fs.unlinkSync(req.file.path);
-        } catch (unlinkErr) {
-          console.error("Failed to delete uploaded file:", unlinkErr);
-        }
-      }
       res.status(500).json({ error: "Bulk upload failed" });
     }
   }

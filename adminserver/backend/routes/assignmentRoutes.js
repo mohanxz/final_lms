@@ -21,39 +21,16 @@ const s3 = new S3Client({
 });
 const bucketName = process.env.S3_BUCKET;
 
-// Memory upload for student answers
+// Memory storage for ALL uploads to ensure Vercel compatibility
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Disk storage for assignment questions
-const assignmentStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const { batch, module, title } = req.query;
-    if (!batch || !module || !title) {
-      return cb(new Error("Missing batch/module/title in query-string"), null);
-    }
-    const dir = path.join(
-      __dirname,
-      "..",
-      "uploads",
-      batch,
-      module,
-      title,
-      "assignment",
-    );
-    fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (_req, _file, cb) => cb(null, "question.pdf"),
-});
-const assignmentUpload = multer({ storage: assignmentStorage });
-
 // ===============================
-// 📤 Upload Assignment (Local + S3)
+// 📤 Upload Assignment (Direct to S3)
 // ===============================
 router.post(
   "/upload-assignment",
   verifyAccessToken,
-  assignmentUpload.single("file"),
+  upload.single("file"), // Using memory storage instead of disk storage
   async (req, res) => {
     const { batch, module, title } = req.query;
 
@@ -62,31 +39,28 @@ router.post(
     }
 
     const key = `${batch}/${module}/${title}/assignment/question.pdf`;
-    const localPath = req.file.path;
 
     try {
-      const fileBuffer = fs.readFileSync(localPath);
-
+      // Upload directly to S3 from buffer (Vercel compatible)
       await s3.send(
         new PutObjectCommand({
           Bucket: bucketName,
           Key: key,
-          Body: fileBuffer,
+          Body: req.file.buffer, // Using the buffer from memory
           ContentType: "application/pdf",
         }),
       );
 
       const s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(key)}`;
       res.json({
-        message: "Assignment uploaded locally and to S3 successfully",
-        localPath,
+        message: "Assignment uploaded to S3 successfully",
         s3Url,
       });
     } catch (err) {
       console.error("❌ Upload failed:", err);
       res
         .status(500)
-        .json({ error: "Failed to upload to S3 after saving locally" });
+        .json({ error: "Failed to upload to S3" });
     }
   },
 );
