@@ -179,7 +179,9 @@ router.post("/", verifyAccessToken, async (req, res) => {
     }
 
     const adminsWithUserIds = await Promise.all(
-      admins.map(async (adminEntry) => {
+      admins
+        .filter((entry) => entry && entry.admin)
+        .map(async (adminEntry) => {
         const adminDoc = await Admin.findById(adminEntry.admin).select("user");
 
         if (!adminDoc) {
@@ -257,7 +259,9 @@ router.put("/:id", verifyAccessToken, async (req, res) => {
     }
 
     const adminsWithUserIds = await Promise.all(
-      admins.map(async (adminEntry) => {
+      admins
+        .filter((entry) => entry && entry.admin)
+        .map(async (adminEntry) => {
         const adminDoc = await Admin.findById(adminEntry.admin).select("user");
 
         if (!adminDoc) {

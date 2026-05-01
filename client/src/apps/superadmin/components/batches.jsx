@@ -140,7 +140,7 @@ const Batches = () => {
 
   const fetchUniversities = async () => {
     try {
-      const response = await fetch("http://universities.hipolabs.com/search?country=India");
+      const response = await fetch("https://universities.hipolabs.com/search?country=India");
       const data = await response.json();
       // Remove duplicates and sort
       const uniqueUnis = [...new Set(data.map(u => u.name))].sort();
@@ -202,11 +202,11 @@ const Batches = () => {
     const token = localStorage.getItem("token");
     API.get("/api/admins", { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => {
-        console.log("========== STAFF DATA ==========");
-        console.log("Received Admins - Full Data:", res.data);
+        console.log("==========OK==========");
+        // console.log("Received Admins - Full Data:", res.data);
         res.data.forEach((admin) => {
           console.log(
-            `Admin ID: ${admin._id}, Name: ${admin.user?.name}, Specialisation: ${admin.specialisation}`,
+        "ok"
           );
         });
         console.log("================================");

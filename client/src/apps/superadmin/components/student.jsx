@@ -141,7 +141,7 @@ const Student = () => {
 
   const fetchUniversities = async () => {
     try {
-      const response = await fetch("http://universities.hipolabs.com/search?country=India");
+      const response = await fetch("https://universities.hipolabs.com/search?country=India");
       const data = await response.json();
       const uniqueUnis = [...new Set(data.map(u => u.name))].sort();
       setUniversities(uniqueUnis);
