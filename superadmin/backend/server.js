@@ -24,42 +24,12 @@ const app = express();
 /* CORS CONFIG */
 /* ---------------------- */
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://cybernaut-lms-v2.onrender.com',
-  "https://cybernaut-indol.vercel.app"
-];
-
+// origin: true automatically allows the origin of the request for maximum compatibility
 app.use(cors({
-  origin: function (origin, callback) {
-
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-
-  },
-
+  origin: true,
   credentials: true,
-
-  methods: [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS"
-  ],
-
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization"
-  ]
-
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json());
