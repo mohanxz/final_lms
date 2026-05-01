@@ -24,30 +24,19 @@ const finalassgnRoutes = require("./routes/finalAssignment.js");
 const courseRoutes = require("./routes/courseRoute");
 const s3AnswerCheckRoute = require("./routes/s3AnswerCheck");
 const practicalRoutes = require("./routes/practical");
-const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://cybernaut-lms-v2.onrender.com",
-  "http://51.20.34.255:3000",
-  "http://51.20.34.255:5173",
-];
 
+const app = express();
+
+// origin: true automatically allows the origin of the request for maximum compatibility
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
+
 app.use(express.json());
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -57,8 +46,6 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("Admin DB Connected"))
   .catch(console.error);
-
-// Static route to access uploaded files
 
 app.use(uploadRoutes);
 app.use("/notes", noteRoutes);
@@ -82,4 +69,7 @@ app.use("/api", s3Urls); //  Mount at /api
 app.use("/api/s3-answers", s3AnswerCheckRoute);
 app.use("/api/practicals", practicalRoutes);
 
-app.listen(5002, () => console.log("Admin server on 5002"));
+const PORT = process.env.PORT || 5002;
+app.listen(PORT, () => console.log(`Admin server on ${PORT}`));
+
+module.exports = app;
