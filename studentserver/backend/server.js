@@ -30,6 +30,10 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+// Explicitly handle preflight requests
+app.options('*', cors());
+
+
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
@@ -54,3 +58,5 @@ app.use('/api/final-quiz', finalQuizRoute);
 app.use('/api/practical', practicalRoutes);
 
 app.listen(5003, () => console.log('Student server on 5003'));
+
+module.exports = app;
