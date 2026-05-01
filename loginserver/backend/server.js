@@ -6,13 +6,24 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
-// Temporarily allowing all origins to fix the CORS block
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://cybernaut-indol.vercel.app"
+];
+
 app.use(cors({
-  origin: true, 
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
 }));
+
+app.options("*", cors()); // 🔥 important
 
 app.use(express.json());
 
@@ -24,5 +35,3 @@ app.use('/auth', authRoutes);
 
 const PORT = process.env.PORT || 5004;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-module.exports = app;
