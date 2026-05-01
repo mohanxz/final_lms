@@ -13,14 +13,22 @@ const allowedOrigins = [
   'http://51.20.34.255:3000',
   'http://51.20.34.255:5173',
   'https://cybernaut-indol.vercel.app',
+  'https://loginserver-gold.vercel.app'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    
+    // Normalize origin by removing trailing slash for comparison
+    const normalizedOrigin = origin.replace(/\/$/, "");
+    const isAllowed = allowedOrigins.some(o => o.replace(/\/$/, "") === normalizedOrigin);
+
+    if (isAllowed) {
       return callback(null, true);
     } else {
+      console.log("CORS blocked for origin:", origin);
       return callback(new Error('Not allowed by CORS'));
     }
   },
